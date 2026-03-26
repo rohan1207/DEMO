@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Google tag (gtag.js) -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-8RKDFTHRWM"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-8RKDFTHRWM");
+    </script>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/assets/images/logo-wave.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Preload 3D model for instant display -->
+    <link rel="preload" href="/glg_models/500ml_sq_rounded.glb" as="fetch" crossorigin="anonymous" />
+    <title>The Ever – Business-class residential complex | Tekta Group</title>
+    <meta
+      name="description"
+      content="The Ever complex is located in the Obrucheva district, a 7-minute walk from Kaluzhskaya metro station. Functional layouts, master bedrooms, terraces, French balconies, apartments with conservatories."
+    />
+    <meta
+      name="keywords"
+      content="IML packaging, IML containers, food packaging, packaging manufacturer, Coimbatore packaging, In-Mold Labeling, food containers, round containers, rectangular containers, sweet boxes, custom packaging, packaging solutions, Visishta Packaging"
+    />
+    <meta name="author" content="Visishta Packaging Pvt Ltd" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph tags for social sharing -->
+    <meta
+      property="og:title"
+      content="Visishta Packaging - Premium IML Packaging Solutions"
+    />
+    <meta
+      property="og:description"
+      content="Coimbatore's leading IML packaging manufacturer. Crafting excellence in every container with 15+ years of experience. Premium quality food containers and custom packaging solutions."
+    />
+    <meta property="og:url" content="https://visishtapackaging.com" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://visishtapackaging.com/logo.png" />
+    <meta property="og:site_name" content="Visishta Packaging" />
+    
+    <!-- Twitter Card tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Visishta Packaging - Premium IML Packaging Solutions" />
+    <meta name="twitter:description" content="Coimbatore's leading IML packaging manufacturer. Crafting excellence in every container with 15+ years of experience." />
+    <meta name="twitter:image" content="https://visishtapackaging.com/logo.png" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      // Check if we need to redirect to a specific path
+      (function () {
+        const redirect = sessionStorage.getItem("redirect");
+        if (redirect) {
+          sessionStorage.removeItem("redirect");
+          if (redirect !== location.pathname) {
+            history.replaceState(null, null, redirect);
+          }
+        }
+      })();
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "ManufacturingPlant",
+        "@id": "https://visishtapackaging.com",
+        "name": "Visishta Packaging Pvt Ltd",
+        "alternateName": "Visishta Packaging",
+        "url": "https://visishtapackaging.com",
+        "logo": "https://visishtapackaging.com/logo.png",
+        "image": "https://visishtapackaging.com/logo.png",
+        "description": "Visishta Packaging is Coimbatore's premier IML (In-Mold Labeling) packaging manufacturer. With over 15 years of experience, we craft excellence in every container, delivering premium quality IML packaging solutions including round containers, rectangular containers, sweet boxes, and custom food containers. We combine cutting-edge technology with precision manufacturing to meet the highest standards of quality, safety, and durability.",
+        "foundingDate": "2009",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Coimbatore",
+          "addressRegion": "Tamil Nadu",
+          "addressCountry": "India"
+        },
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "Customer Service",
+          "email": "info@visishtapackaging.com",
+          "availableLanguage": ["English", "Tamil", "Hindi"]
+        },
+        "sameAs": [
+          "https://facebook.com",
+          "https://instagram.com",
+          "https://linkedin.com",
+          "https://twitter.com"
+        ],
+        "areaServed": {
+          "@type": "Country",
+          "name": "India"
+          },
+        "knowsAbout": [
+          "IML Packaging",
+          "In-Mold Labeling",
+          "Food Containers",
+          "Packaging Manufacturing",
+          "Custom Packaging Solutions"
+        ],
+        "makesOffer": {
+          "@type": "Offer",
+          "itemOffered": [
+            {
+              "@type": "Product",
+              "name": "Round IML Containers",
+              "description": "Premium quality round food containers with In-Mold Labeling"
+          },
+          {
+              "@type": "Product",
+              "name": "Rectangular IML Containers",
+              "description": "Durable rectangular food containers with custom IML labels"
+          },
+          {
+              "@type": "Product",
+              "name": "Sweet Boxes",
+              "description": "Specialty sweet boxes with premium IML packaging"
+          },
+          {
+              "@type": "Product",
+              "name": "Custom IML Packaging Solutions",
+              "description": "Tailored IML packaging solutions for your brand"
+            }
+          ]
+        }
+      }
+    </script>
+    <!-- Google Model Viewer -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+    <!-- Suppress Three.js multiple instance warning -->
+    <script>
+      // Suppress Three.js multiple instance warning (model-viewer includes its own Three.js)
+      const originalWarn = console.warn;
+      console.warn = function(...args) {
+        if (args[0] && typeof args[0] === 'string' && args[0].includes('Multiple instances of Three.js')) {
+          return; // Suppress this specific warning
+        }
+        originalWarn.apply(console, args);
+      };
+    </script>
+    <!-- Razorpay Checkout Script -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

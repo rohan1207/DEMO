@@ -1,0 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Ever theme – match ever-live-here.com global/landing */
+:root {
+  --spacing-s: 20px;
+  --spacing-l: 20px;
+  --col: 50vw;
+  --header-height: 56px;
+  --viewport-height: 100vh;
+  /* Cold palette (ui-cold-3) */
+  --c-cold-1: #dce2eb;
+  --c-cold-2: #95a3ae;
+  --c-cold-3: #313e48;
+  --c-warm-1: #dcc5b7;
+  --c-warm-2: #ac7e65;
+  --c-warm-3: #402020;
+  --c-green: #293630;
+  --c-white: #fff;
+  /* Use a white global background so any exposed page edges match the frames */
+  --t-background: #ffffff;
+  --t-heading: var(--c-cold-3);
+  --t-text: var(--c-cold-3);
+  --t-accent: var(--c-cold-2);
+  --t-line: rgba(49, 62, 72, 0.15);
+}
+
+@media (min-width: 980px) {
+  :root { --col: calc(100vw / 6); }
+}
+
+@media (min-width: 1920px) {
+  :root {
+    --spacing-s: 30px;
+    --spacing-l: 70px;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, -webkit-system-font, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--t-text);
+  background: var(--t-background);
+}
+
+/* Utility: screen reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

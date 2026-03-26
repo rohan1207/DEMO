@@ -1,0 +1,60 @@
+import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import DripMiniCart from './components/drip/DripMiniCart';
+import { StoreProvider } from './context/StoreContext';
+import AccountPage from './pages/AccountPage';
+import AuthPage from './pages/AuthPage';
+import AboutPage from './pages/AboutPage';
+import CheckoutPage from './pages/CheckoutPage';
+import ContactPage from './pages/ContactPage';
+import HomePage from './pages/HomePage';
+import LandingPage from './pages/LandingPage';
+import PolicyPage from './pages/PolicyPage';
+import ProductDetailPage from './pages/ProductDetailPage';
+import ShopPage from './pages/ShopPage';
+import TermsPage from './pages/TermsPage';
+import WishlistPage from './pages/WishlistPage';
+import './styles/drip.css';
+
+function AppShell() {
+  const [cartOpen, setCartOpen] = useState(false);
+  const location = useLocation();
+  const isLandingLoaderRoute = location.pathname === '/';
+
+  return (
+    <div className="app-layout">
+      {!isLandingLoaderRoute && <Navbar onCartClick={() => setCartOpen(true)} />}
+      <main className={isLandingLoaderRoute ? 'min-h-screen bg-white' : 'main-content bg-white'}>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/hone" element={<Navigate to="/home" replace />} />
+          <Route path="/shop" element={<ShopPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/product/:slug" element={<ProductDetailPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/policy" element={<PolicyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/wishlist" element={<WishlistPage />} />
+          <Route path="/login" element={<AuthPage />} />
+          <Route path="/account" element={<AccountPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+        {!isLandingLoaderRoute && <Footer />}
+      </main>
+      {!isLandingLoaderRoute && <DripMiniCart open={cartOpen} onClose={() => setCartOpen(false)} />}
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <StoreProvider>
+      <AppShell />
+    </StoreProvider>
+  );
+}
