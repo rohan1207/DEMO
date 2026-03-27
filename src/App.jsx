@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -22,12 +22,23 @@ import './styles/drip.css';
 function AppShell() {
   const [cartOpen, setCartOpen] = useState(false);
   const location = useLocation();
+  const mainContentRef = useRef(null);
   const isLandingLoaderRoute = location.pathname === '/';
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    if (mainContentRef.current) {
+      mainContentRef.current.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    }
+  }, [location.pathname]);
 
   return (
     <div className="app-layout">
       {!isLandingLoaderRoute && <Navbar onCartClick={() => setCartOpen(true)} />}
-      <main className={isLandingLoaderRoute ? 'min-h-screen bg-white' : 'main-content bg-white'}>
+      <main
+        ref={mainContentRef}
+        className={isLandingLoaderRoute ? 'min-h-screen bg-white' : 'main-content bg-white'}
+      >
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/home" element={<HomePage />} />
