@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -52,6 +52,33 @@ function AppShell() {
 }
 
 export default function App() {
+  const [isPhoneScreen, setIsPhoneScreen] = useState(() => window.innerWidth <= 768);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 768px)');
+    const handleScreenChange = (event) => {
+      setIsPhoneScreen(event.matches);
+    };
+
+    setIsPhoneScreen(mediaQuery.matches);
+    mediaQuery.addEventListener('change', handleScreenChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleScreenChange);
+    };
+  }, []);
+
+  if (isPhoneScreen) {
+    return (
+      <div className="phone-block-screen">
+        <div className="phone-block-content">
+          <h1>Please open on desktop.</h1>
+          <p>Phone coming very soon.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <StoreProvider>
       <AppShell />
