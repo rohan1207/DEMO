@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function DripPreloader({ percent, visible }) {
+export default function DripPreloader({ percent, visible, onVideoEnd }) {
   return (
     <div
       id="preloader-container"
@@ -18,9 +18,10 @@ export default function DripPreloader({ percent, visible }) {
               className="w-full h-auto object-contain"
               autoPlay
               muted
-              loop
+              loop={false}
               playsInline
               preload="auto"
+              onEnded={onVideoEnd}
             />
           </div>
         </div>
