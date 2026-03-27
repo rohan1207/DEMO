@@ -123,21 +123,21 @@ const AboutUs = () => {
       title: "CLEAN DESIGN LANGUAGE",
       description:
         "Every surface, line, and proportion is shaped for visual clarity and modern everyday carry.",
-      image: "/dining_space.png",
+      image: "/a1.png",
     },
     {
       id: 2,
       title: "STRUCTURAL DURABILITY",
       description:
         "Engineered to handle routine motion and daily pressure without compromise in form or function.",
-      image: "/fresh_food.png",
+      image: "/a2.png",
     },
     {
       id: 3,
       title: "SEAMLESS USABILITY",
       description:
         "Built to integrate naturally into workflow, commute, and lifestyle with zero friction.",
-      image: "/parking_space.webp",
+      image: "/a3.png",
     },
   ];
 

@@ -5,14 +5,26 @@ import { useStore } from '../context/StoreContext';
 export default function WishlistPage() {
   const { wishlist, toggleWishlist, catalog } = useStore();
   const items = catalog.filter((p) => wishlist.includes(p.id));
+  const isEmpty = !items.length;
 
   return (
-    <section className="mx-auto w-full max-w-6xl px-6 py-10 lg:px-12">
-      <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Wishlist</h1>
-      {!items.length ? (
-        <p className="mt-4 text-slate-600">
-          Your wishlist is empty. <Link to="/shop" className="underline">Explore products</Link>.
-        </p>
+    <section
+      className={`mx-auto flex w-full max-w-6xl flex-col px-6 py-10 lg:px-12 ${
+        isEmpty ? 'min-h-[calc(100vh-180px)]' : ''
+      }`}
+    >
+      <h1 className="text-center text-3xl font-semibold tracking-tight text-slate-900">Wishlist</h1>
+      <p className="mt-2 text-center text-sm text-slate-500">Save your favorite products here.</p>
+      {isEmpty ? (
+        <div className="flex flex-1 flex-col items-center justify-center text-center">
+          <p className="text-lg font-medium text-slate-700">No items in your wishlist yet.</p>
+          <Link
+            to="/shop"
+            className="mt-4 rounded-full bg-[#7FAF73] px-6 py-2 text-xs uppercase tracking-[0.18em] text-white"
+          >
+            Shop now
+          </Link>
+        </div>
       ) : (
         <div className="mt-6 grid gap-5 md:grid-cols-2">
           {items.map((product) => (

@@ -12,11 +12,8 @@ const MOBILE_END_FRAME = 830;
 const desktopLoadCount = Math.ceil(DESKTOP_TOTAL_FRAMES / FRAME_STEP);
 const MOBILE_TOTAL_FRAMES = Math.ceil((MOBILE_END_FRAME - MOBILE_START_FRAME + 1) / FRAME_STEP);
 
-// In-memory cache so landing preload can be reused on /home instantly.
-const frameCache = {
-  desktop: null,
-  mobile: null,
-};
+const ENTRY_READY_PERCENT = 12;
+const ENTRY_MAX_WAIT_MS = 2500;
 
 // Wide screens (>1081px): full sequence from mobile-webp folder (785 frames).
 function framePathDesktop(loadIndex) {
@@ -44,88 +41,154 @@ function loadImage(src) {
   });
 }
 
-/**
- * Loads every FRAME_STEP-th frame in parallel batches.
- * Reports progress as frames complete. Ready fires when all batches done.
- */
-export function useSequencePreload(onProgress) {
-  const [frames, setFrames] = useState(null);
-  const [ready, setReady] = useState(false);
-  const [error, setError] = useState(null);
+function createManager(total, pathFn) {
+  return {
+    total,
+    pathFn,
+    loaded: 0,
+    frames: null,
+    ready: false,
+    entryReady: false,
+    error: null,
+    started: false,
+    subscribers: new Set(),
+  };
+}
 
-  const report = useCallback(
-    (loaded, total) => {
-      const percent = total > 0 ? Math.min(100, Math.floor((100 * loaded) / total)) : 100;
-      onProgress?.(percent);
-    },
-    [onProgress]
-  );
+const preloadManagers = {
+  desktop: createManager(desktopLoadCount, framePathDesktop),
+  mobile: createManager(MOBILE_TOTAL_FRAMES, framePathMobile),
+};
 
-  useEffect(() => {
-    let cancelled = false;
+function toSnapshot(manager) {
+  return {
+    frames: manager.frames,
+    ready: manager.ready,
+    entryReady: manager.entryReady,
+    error: manager.error,
+    loaded: manager.loaded,
+    total: manager.total,
+  };
+}
 
-    (async () => {
-      const isMobile = typeof window !== 'undefined' ? window.innerWidth <= 1081 : false;
-      const cacheKey = isMobile ? 'mobile' : 'desktop';
-      if (frameCache[cacheKey]) {
-        const expectedLen = isMobile ? MOBILE_TOTAL_FRAMES : desktopLoadCount;
-        if (frameCache[cacheKey].length === expectedLen) {
-          setFrames(frameCache[cacheKey]);
-          report(100, 100);
-          setReady(true);
-          return;
-        }
-        frameCache[cacheKey] = null;
-      }
+function subscribeManager(manager, callback) {
+  manager.subscribers.add(callback);
+  callback(toSnapshot(manager));
+  return () => {
+    manager.subscribers.delete(callback);
+  };
+}
 
-      const loadCount = isMobile ? MOBILE_TOTAL_FRAMES : desktopLoadCount;
-      const pathFn = isMobile ? framePathMobile : framePathDesktop;
+function notifyManager(manager) {
+  const snapshot = toSnapshot(manager);
+  manager.subscribers.forEach((cb) => cb(snapshot));
+}
 
-      // Load in parallel batches of 20 to maximise throughput without flooding the browser
-      const BATCH = 20;
-      const results = new Array(loadCount).fill(null);
-      let loaded = 0;
+function ensureEntryReady(manager, startedAt) {
+  if (manager.entryReady) return;
+  const threshold = Math.max(1, Math.floor(manager.total * (ENTRY_READY_PERCENT / 100)));
+  const hasFirstFrame = Boolean(manager.frames?.[0]);
+  const reachedMinFrames = manager.loaded >= threshold && hasFirstFrame;
+  const timedOut = Date.now() - startedAt >= ENTRY_MAX_WAIT_MS && hasFirstFrame;
+  if (reachedMinFrames || timedOut) {
+    manager.entryReady = true;
+  }
+}
 
-      for (let start = 0; start < loadCount; start += BATCH) {
-        if (cancelled) return;
-        const end = Math.min(start + BATCH, loadCount);
+function startManager(manager) {
+  if (manager.started) return;
+  manager.started = true;
+
+  (async () => {
+    const BATCH = 20;
+    const startedAt = Date.now();
+    const results = new Array(manager.total).fill(null);
+    manager.frames = results;
+    notifyManager(manager);
+
+    try {
+      // Load first frame first so canvas always has a drawable fallback frame.
+      const firstFrame = await loadImage(manager.pathFn(0));
+      results[0] = firstFrame;
+      manager.loaded = firstFrame ? 1 : 0;
+      ensureEntryReady(manager, startedAt);
+      notifyManager(manager);
+
+      for (let start = 1; start < manager.total; start += BATCH) {
+        const end = Math.min(start + BATCH, manager.total);
         const batch = Array.from({ length: end - start }, (_, j) => {
           const idx = start + j;
-          return loadImage(pathFn(idx)).then((img) => {
-            results[idx] = img;
-            loaded++;
-            report(loaded, loadCount);
+          return loadImage(manager.pathFn(idx)).then((img) => {
+            if (img) {
+              results[idx] = img;
+              manager.loaded += 1;
+            }
+            ensureEntryReady(manager, startedAt);
           });
         });
         await Promise.all(batch);
+
+        // Batch-level notify keeps UI smooth without render thrash.
+        notifyManager(manager);
       }
 
-      if (cancelled) return;
+      manager.ready = true;
+      manager.entryReady = true;
 
-      const imgs = results.filter(Boolean);
-      console.info(`[useSequencePreload] loaded ${imgs.length} / ${loadCount} frames (step=${FRAME_STEP})`);
-
-      if (imgs.length === 0) {
-        setError(
-          new Error(
-            'No sequence frames loaded. Wide: public/assets/seq/mobile-webp/ · Phone: public/assets/seq/desktop-webp/'
-          )
+      if (manager.loaded === 0) {
+        manager.error = new Error(
+          'No sequence frames loaded. Wide: public/assets/seq/mobile-webp/ · Phone: public/assets/seq/desktop-webp/'
         );
-        report(loadCount, loadCount);
-        setReady(true);
-        return;
       }
 
-      setFrames(imgs);
-      frameCache[cacheKey] = imgs;
-      report(loadCount, loadCount);
-      setReady(true);
-    })();
+      notifyManager(manager);
+    } catch (err) {
+      manager.error = err instanceof Error ? err : new Error('Failed to preload sequence frames');
+      manager.entryReady = true;
+      manager.ready = true;
+      notifyManager(manager);
+    }
+  })();
+}
 
-    return () => { cancelled = true; };
+/**
+ * Progressive preload:
+ * - entryReady: enough frames loaded to start quickly (used by splash redirect)
+ * - ready: full sequence loaded
+ */
+export function useSequencePreload(onProgress) {
+  const getInitialSnapshot = () => {
+    const isMobile = typeof window !== 'undefined' ? window.innerWidth <= 1081 : false;
+    return toSnapshot(isMobile ? preloadManagers.mobile : preloadManagers.desktop);
+  };
+  const [snapshot, setSnapshot] = useState(getInitialSnapshot);
+
+  useEffect(() => {
+    const isMobile = typeof window !== 'undefined' ? window.innerWidth <= 1081 : false;
+    const manager = isMobile ? preloadManagers.mobile : preloadManagers.desktop;
+    startManager(manager);
+    const unsubscribe = subscribeManager(manager, setSnapshot);
+    return unsubscribe;
+  }, []);
+
+  const report = useCallback(() => {
+    const percent =
+      snapshot.total > 0
+        ? Math.min(100, Math.floor((100 * snapshot.loaded) / snapshot.total))
+        : 100;
+    onProgress?.(percent);
+  }, [onProgress, snapshot.loaded, snapshot.total]);
+
+  useEffect(() => {
+    report();
   }, [report]);
 
-  return { frames, ready, error };
+  return {
+    frames: snapshot.frames,
+    ready: snapshot.ready,
+    entryReady: snapshot.entryReady,
+    error: snapshot.error,
+  };
 }
 
 export {

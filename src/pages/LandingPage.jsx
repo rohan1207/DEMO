@@ -7,12 +7,12 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const [percent, setPercent] = useState(0);
   const onProgress = useCallback((p) => setPercent(p), []);
-  const { ready } = useSequencePreload(onProgress);
+  const { entryReady } = useSequencePreload(onProgress);
 
   useEffect(() => {
-    if (!ready) return;
+    if (!entryReady) return;
     navigate('/home', { replace: true });
-  }, [ready, navigate]);
+  }, [entryReady, navigate]);
 
   return (
     <div className="min-h-screen bg-white">
