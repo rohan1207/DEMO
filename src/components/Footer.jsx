@@ -5,16 +5,16 @@ const ASSETS = '/assets/images';
 
 export default function Footer() {
   return (
-    <footer className="drip-footer mt-10 w-full text-left">
+    <footer className="DRIP-footer mt-10 w-full text-left">
       <div className="flex flex-row flex-wrap gap-8 w-full">
-        <div className="drip-column">
-          <Link to="/"><img src={`${ASSETS}/logo-wave.svg`} alt="Drip" className="drip-logo block" /></Link>
+        <div className="DRIP-column">
+          <Link to="/"><img src={`${ASSETS}/logo-wave.svg`} alt="DRIP" className="DRIP-logo block" /></Link>
           <p className="text-[#9ca3af]">
-            At T-REX, we engineer everyday carry through clean design, structural durability, and premium usability.
+            At DRIP, we engineer everyday carry through clean design, structural durability, and premium usability.
           </p>
           <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><img src={`${ASSETS}/btnInstagram.svg`} alt="Instagram" className="block mt-2" /></a>
         </div>
-        <div className="drip-column">
+        <div className="DRIP-column">
           <p className="font-bold text-white uppercase">Menu</p>
           <p className="flex flex-col">
             <Link to="/home">Home</Link>
@@ -24,7 +24,7 @@ export default function Footer() {
             <Link to="/login">Account</Link>
           </p>
         </div>
-        <div className="drip-column">
+        <div className="DRIP-column">
           <p className="font-bold text-white uppercase">Policies</p>
           <p className="text-[#9ca3af]">
             Read our policy and legal pages before purchasing.
@@ -34,10 +34,10 @@ export default function Footer() {
             <Link to="/terms">Terms & Conditions</Link>
           </p>
         </div>
-        <div className="drip-column">
+        <div className="DRIP-column">
           <p className="font-bold text-white uppercase">Contact</p>
           <p className="text-[#9ca3af]">
-            T-REX
+            DRIP
             <br />
             B3+4, Navswarajya Housing Society,
             <br />
@@ -50,7 +50,7 @@ export default function Footer() {
           </p>
         </div>
       </div>
-      <p className="drip-footer-info text-center text-[#9ca3af]">© 2026 T-REX Store. All rights reserved.</p>
+      <p className="DRIP-footer-info text-center text-[#9ca3af]">© 2026 DRIP Store. All rights reserved.</p>
     </footer>
   );
 }

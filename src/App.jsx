@@ -17,7 +17,7 @@ import ProductDetailPage from './pages/ProductDetailPage';
 import ShopPage from './pages/ShopPage';
 import TermsPage from './pages/TermsPage';
 import WishlistPage from './pages/WishlistPage';
-import './styles/drip.css';
+import './styles/DRIP.css';
 
 function AppShell() {
   const [cartOpen, setCartOpen] = useState(false);
@@ -62,8 +62,9 @@ function AppShell() {
   );
 }
 
-export default function App() {
+function AppContent() {
   const [isPhoneScreen, setIsPhoneScreen] = useState(() => window.innerWidth <= 768);
+  const location = useLocation();
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 768px)');
@@ -79,7 +80,12 @@ export default function App() {
     };
   }, []);
 
-  if (isPhoneScreen) {
+  const phoneAllowedRoutes = ['/account', '/checkout', '/shop', '/about', '/wishlist', '/contact'];
+  const allowPhoneAccess =
+    phoneAllowedRoutes.some((route) => location.pathname.startsWith(route)) ||
+    location.pathname.startsWith('/product/');
+
+  if (isPhoneScreen && !allowPhoneAccess) {
     return (
       <div className="phone-block-screen">
         <div className="phone-block-content">
@@ -95,4 +101,8 @@ export default function App() {
       <AppShell />
     </StoreProvider>
   );
+}
+
+export default function App() {
+  return <AppContent />;
 }

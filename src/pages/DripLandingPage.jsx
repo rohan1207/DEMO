@@ -1,15 +1,15 @@
 import React, { useCallback } from 'react';
-import DripLandingSequence from '../components/drip/DripLandingSequence';
+import DRIPLandingSequence from '../components/DRIP/DRIPLandingSequence';
 import { useSequencePreload } from '../hooks/useSequencePreload';
 
-export default function DripLandingPage() {
+export default function DRIPLandingPage() {
   const onProgress = useCallback(() => {}, []);
 
   const { frames, entryReady } = useSequencePreload(onProgress);
 
   return (
-    <div className="drip-page min-h-screen bg-white overflow-x-hidden">
-      <DripLandingSequence frames={frames} sequenceReady={entryReady} />
+    <div className="DRIP-page min-h-screen bg-white overflow-x-hidden">
+      <DRIPLandingSequence frames={frames} sequenceReady={entryReady} />
     </div>
   );
 }

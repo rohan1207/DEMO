@@ -15,58 +15,70 @@ function loadRazorpayScript() {
   });
 }
 
-function formatShippingPayload({ name, email, phone, address }) {
-  return [
-    `Name: ${name.trim()}`,
-    `Email: ${email.trim()}`,
-    `Phone: ${phone.trim()}`,
-    '',
-    'Address:',
-    address.trim(),
-  ].join('\n');
-}
-
 const API_BASE = import.meta.env.VITE_API_BASE || '/api';
 
 export default function CheckoutPage() {
-  const { cart, cartTotal, user, catalog, createRazorpayOrder, placeOrder } = useStore();
+  const { cart, cartTotal, user, token, catalog, createRazorpayOrder, placeOrder } = useStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [form, setForm] = useState({
-    name: '',
+    fullName: '',
     email: '',
     phone: '',
-    address: '',
+    line1: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: 'India',
   });
   const navigate = useNavigate();
+  const updateForm = (key, value) => {
+    setError('');
+    setForm((f) => ({ ...f, [key]: value }));
+  };
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      navigate('/account?returnTo=/checkout', { replace: true });
+      return;
+    }
+    const defaultAddress = user.addresses?.find((a) => a.isDefault) || user.addresses?.[0] || {};
     setForm((f) => ({
       ...f,
-      name: user.name || f.name,
+      fullName: defaultAddress.fullName || user.name || f.fullName,
       email: user.email || f.email,
-      phone: user.phone || f.phone,
-      address: user.address || f.address,
+      phone: defaultAddress.phone || user.phone || f.phone,
+      line1: defaultAddress.line1 || f.line1,
+      city: defaultAddress.city || f.city,
+      state: defaultAddress.state || f.state,
+      postalCode: defaultAddress.postalCode || f.postalCode,
+      country: defaultAddress.country || f.country,
     }));
-  }, [user]);
+  }, [user, navigate]);
 
   const lineItems = useMemo(() => {
-    return cart.map((item) => {
+    return cart
+      .map((item) => {
       const p = catalog.find((x) => x.id === item.productId || x._id === item.productId);
-      const title = p?.shortName || p?.name || 'Item';
-      const price = p?.price ?? 0;
+      if (!p) return null;
+      const title = p.shortName || p.name || 'Item';
+      const price = p.price ?? 0;
       return { ...item, title, price, lineTotal: price * item.qty };
-    });
+    })
+      .filter(Boolean);
   }, [cart, catalog]);
 
   const formValid =
-    form.name.trim() &&
+    form.fullName.trim() &&
     form.email.trim() &&
     form.phone.trim() &&
-    form.address.trim().length >= 8;
+    form.line1.trim() &&
+    form.city.trim() &&
+    form.state.trim() &&
+    form.postalCode.trim();
 
   if (!cart.length) return <Navigate to="/shop" replace />;
+  if (!user) return null;
 
   const payNow = async () => {
     setError('');
@@ -74,11 +86,6 @@ export default function CheckoutPage() {
       setError('Please fill in your name, email, phone, and full shipping address.');
       return;
     }
-    if (!user) {
-      setError('Please sign in to complete payment.');
-      return;
-    }
-
     setLoading(true);
     const loaded = await loadRazorpayScript();
     if (!loaded) {
@@ -100,14 +107,14 @@ export default function CheckoutPage() {
       return;
     }
 
-    const shippingAddress = formatShippingPayload(form);
+    const shippingAddress = { ...form };
 
     const rz = new window.Razorpay({
       key,
       amount: response.order.amount,
       currency: response.order.currency,
       order_id: response.order.id,
-      name: 'Drip',
+      name: 'T-REX',
       description: 'Premium Tumbler Checkout',
       handler: async (responseData) => {
         const verify = await window.fetch(
@@ -116,7 +123,7 @@ export default function CheckoutPage() {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${localStorage.getItem('drip_token') || ''}`,
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
             body: JSON.stringify(responseData),
           }
@@ -132,10 +139,10 @@ export default function CheckoutPage() {
           razorpayPaymentId: responseData.razorpay_payment_id,
           shippingAddress,
         });
-        navigate('/account');
+        navigate('/account?tab=orders');
       },
       prefill: {
-        name: form.name.trim(),
+        name: form.fullName.trim(),
         email: form.email.trim(),
         contact: form.phone.replace(/\D/g, '').slice(-10),
       },
@@ -155,20 +162,6 @@ export default function CheckoutPage() {
         Enter your contact and shipping details, review your order, then pay securely.
       </p>
 
-      {!user && (
-        <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm text-amber-900">
-          <span className="font-medium">Sign in required for payment.</span>{' '}
-          <Link to="/login" className="font-semibold text-[#5a8f52] underline underline-offset-2 hover:text-[#4a7a44]">
-            Sign in
-          </Link>{' '}
-          or{' '}
-          <Link to="/login" className="font-semibold text-[#5a8f52] underline underline-offset-2 hover:text-[#4a7a44]">
-            create an account
-          </Link>{' '}
-          to continue — you can still fill in your details below.
-        </div>
-      )}
-
       <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_minmax(280px,380px)] lg:items-start">
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
           <h2 className="text-lg font-semibold text-slate-900">Shipping details</h2>
@@ -182,8 +175,8 @@ export default function CheckoutPage() {
               <input
                 id="co-name"
                 autoComplete="name"
-                value={form.name}
-                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                value={form.fullName}
+                onChange={(e) => updateForm('fullName', e.target.value)}
                 className={field}
                 placeholder="Your full name"
               />
@@ -197,7 +190,7 @@ export default function CheckoutPage() {
                 type="email"
                 autoComplete="email"
                 value={form.email}
-                onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                onChange={(e) => updateForm('email', e.target.value)}
                 className={field}
                 placeholder="you@example.com"
               />
@@ -212,24 +205,52 @@ export default function CheckoutPage() {
                 autoComplete="tel"
                 inputMode="tel"
                 value={form.phone}
-                onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                onChange={(e) => updateForm('phone', e.target.value)}
                 className={field}
                 placeholder="+91 or 10-digit mobile"
               />
             </div>
             <div>
-              <label htmlFor="co-address" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-slate-500">
-                Shipping address
+              <label htmlFor="co-line1" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-slate-500">
+                Address line
               </label>
               <textarea
-                id="co-address"
+                id="co-line1"
                 autoComplete="street-address"
-                rows={4}
-                value={form.address}
-                onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
+                rows={3}
+                value={form.line1}
+                onChange={(e) => updateForm('line1', e.target.value)}
                 className={`${field} resize-y min-h-[120px]`}
-                placeholder="House / flat, street, landmark, city, state, PIN code"
+                placeholder="House / flat, street, landmark"
               />
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <label htmlFor="co-city" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-slate-500">
+                  City
+                </label>
+                <input id="co-city" value={form.city} onChange={(e) => updateForm('city', e.target.value)} className={field} />
+              </div>
+              <div>
+                <label htmlFor="co-state" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-slate-500">
+                  State
+                </label>
+                <input id="co-state" value={form.state} onChange={(e) => updateForm('state', e.target.value)} className={field} />
+              </div>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <label htmlFor="co-postal" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-slate-500">
+                  Postal code
+                </label>
+                <input id="co-postal" value={form.postalCode} onChange={(e) => updateForm('postalCode', e.target.value)} className={field} />
+              </div>
+              <div>
+                <label htmlFor="co-country" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-slate-500">
+                  Country
+                </label>
+                <input id="co-country" value={form.country} onChange={(e) => updateForm('country', e.target.value)} className={field} />
+              </div>
             </div>
           </div>
         </div>
@@ -256,7 +277,7 @@ export default function CheckoutPage() {
 
           <button
             type="button"
-            disabled={loading || !user}
+            disabled={loading}
             onClick={payNow}
             className="mt-6 w-full rounded-full bg-[#7FAF73] px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#6fa064] disabled:cursor-not-allowed disabled:opacity-45"
           >

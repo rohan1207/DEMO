@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const ASSETS = '/assets/images';
 
-export default function DripHeader({ onCartClick }) {
+export default function DRIPHeader({ onCartClick }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -30,8 +30,8 @@ export default function DripHeader({ onCartClick }) {
           </Link>
         </div>
 
-        <Link to="/" aria-label="Drip logo" className="absolute left-1/2 -translate-x-1/2 md:max-[1081px]:left-4 md:max-[1081px]:translate-x-0 md:max-[1081px]:w-[125px]">
-          <img src={`${ASSETS}/logo-wave.svg`} alt="Drip" className="h-8 w-auto block" />
+        <Link to="/" aria-label="T-REX logo" className="absolute left-1/2 -translate-x-1/2 md:max-[1081px]:left-4 md:max-[1081px]:translate-x-0 md:max-[1081px]:w-[125px]">
+          <img src={`${ASSETS}/logo-wave.svg`} alt="T-REX" className="h-8 w-auto block" />
         </Link>
 
         <div className="flex flex-row items-center gap-4">

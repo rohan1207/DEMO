@@ -1,4 +1,4 @@
-# Sequence frames (Drip landing)
+# Sequence frames (DRIP landing)
 
 Place your scroll-driven animation frames in **mobile-webp** (used for both desktop and mobile):
 

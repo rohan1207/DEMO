@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 // Load every Nth frame to keep memory under ~2-3 GB.
-// The rAF lerp in DripLandingSequence smooths skipped frames invisibly.
+// The rAF lerp in DRIPLandingSequence smooths skipped frames invisibly.
 const FRAME_STEP = 1; // load all frames; memory is manageable without ImageBitmap conversion
 
 const DESKTOP_TOTAL_FRAMES = 785;

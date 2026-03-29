@@ -59,12 +59,12 @@ export default function Navbar({ onCartClick }) {
           {/* ── Centre: logo (always centred) ── */}
           <Link
             to="/"
-            aria-label="Drip logo"
+            aria-label="T-REX logo"
             className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-auto z-10"
           >
             <img
               src="/logo.png"
-              alt="Drip"
+              alt="T-REX"
             className="h-14 w-auto lg:h-[4.5rem]"
             />
           </Link>
@@ -78,7 +78,7 @@ export default function Navbar({ onCartClick }) {
               Contact Us
             </Link>
             <Link
-              to={user ? '/account' : '/login'}
+              to="/account"
               className="hidden lg:inline-flex items-center justify-center rounded-full border border-slate-200/70 px-3 h-8 text-[11px] font-medium tracking-[0.16em] uppercase text-slate-800 hover:bg-slate-100/80 transition-colors"
             >
               {user ? 'Account' : 'Login'}
@@ -155,7 +155,7 @@ export default function Navbar({ onCartClick }) {
             Contact Us
           </Link>
           <Link
-            to={user ? '/account' : '/login'}
+            to="/account"
             onClick={closeMenu}
             className="text-black/80 hover:text-black text-xl font-medium uppercase py-3 border-b border-slate-200 transition-colors"
           >

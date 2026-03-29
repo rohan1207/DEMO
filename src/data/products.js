@@ -2,7 +2,7 @@ export const products = [
   {
     id: 'sage-green',
     slug: 'sage-green',
-    name: 'Drip Tumbler - Sage Green',
+    name: 'T-REX Tumbler - Sage Green',
     shortName: 'Sage Green',
     price: 2499,
     compareAtPrice: 3000,
@@ -17,14 +17,33 @@ export const products = [
       'Stable grip base',
       'Leak-resistant carry design',
     ],
-    images: ['/product2.png', '/product2.png', '/product2.png', '/product2.png'],
-    fallbackImage:
-      "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'><rect width='100%25' height='100%25' fill='%23f2f5f1'/><text x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23608b58' font-size='52' font-family='Arial'>Sage Green</text></svg>",
+    detailSections: [
+      {
+        title: 'Precision-built body',
+        description:
+          'Double-wall stainless steel with clean contouring keeps the profile minimal while preserving temperature through long desk days and commutes.',
+        image: '/product2.png',
+      },
+      {
+        title: 'Comfort-first carry geometry',
+        description:
+          'The handle and lid relationship is tuned for secure grip transitions, so moving from bag to hand feels balanced and natural.',
+        image: '/middle.png',
+      },
+      {
+        title: 'Quiet premium finishing',
+        description:
+          'Soft matte treatment, measured proportions, and low-noise base contact are designed to look refined in every setting.',
+        image: '/middle.png',
+      },
+    ],
+    heroImage: '/product2.png',
+    galleryImages: ['/product2.png', '/product2.png', '/product2.png'],
   },
   {
     id: 'blush-pink',
     slug: 'blush-pink',
-    name: 'Drip Tumbler - Blush Pink',
+    name: 'T-REX Tumbler - Blush Pink',
     shortName: 'Blush Pink',
     price: 2499,
     compareAtPrice: 3000,
@@ -39,9 +58,28 @@ export const products = [
       'Noise-reducing base',
       'Premium stainless steel body',
     ],
-    images: ['/product1.png', '/product1.png', '/product1.png', '/product1.png'],
-    fallbackImage:
-      "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='1200'><rect width='100%25' height='100%25' fill='%23f6f1f4'/><text x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23956f88' font-size='52' font-family='Arial'>Blush Pink</text></svg>",
+    detailSections: [
+      {
+        title: 'Refined silhouette',
+        description:
+          'A blush-toned finish with clean vertical proportions gives the tumbler a premium, understated presence on desk, commute, and travel setups.',
+        image: '/product1.png',
+      },
+      {
+        title: 'Engineered everyday usability',
+        description:
+          'From lid action to straw path, each interaction is streamlined for repeat daily use without friction, spills, or unnecessary complexity.',
+        image: '/middle.png',
+      },
+      {
+        title: 'Durability without bulk',
+        description:
+          'Structural confidence, balanced weight, and scratch-conscious surfaces provide long-term reliability while maintaining a sleek profile.',
+        image: '/middle.png',
+      },
+    ],
+    heroImage: '/product1.png',
+    galleryImages: ['/product1.png', '/product1.png', '/product1.png'],
   },
 ];
 

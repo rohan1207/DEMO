@@ -1,7 +1,7 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaStar } from 'react-icons/fa';
+import { FaHeart, FaRegHeart, FaStar } from 'react-icons/fa';
 import { useStore } from '../context/StoreContext';
 
 const money = (v) => `₹${v.toLocaleString('en-IN')}`;
@@ -65,7 +65,14 @@ const fadeUp = {
 };
 
 export default function ShopPage() {
-  const { addToCart, toggleWishlist, wishlist, catalog } = useStore();
+  const { addToCart, buyNow, toggleWishlist, wishlist, catalog, catalogLoading, user } = useStore();
+  const navigate = useNavigate();
+
+  const goBuyNow = (productId) => {
+    buyNow(productId, 1);
+    if (!user) navigate('/account?returnTo=/checkout');
+    else navigate('/checkout');
+  };
 
   const scrollToShop = () => {
     document.getElementById('collection')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -73,8 +80,8 @@ export default function ShopPage() {
 
   return (
     <div className="w-full bg-white">
-      {/* Hero — one viewport height below navbar; full-bleed bg image */}
-      <section className="relative h-[calc(100dvh-60px)] max-h-[calc(100dvh-60px)] w-full overflow-hidden border-b border-black/5 lg:h-[calc(100dvh-100px)] lg:max-h-[calc(100dvh-100px)]">
+      {/* Hero — viewport minus navbar; responsive min-heights */}
+      <section className="relative min-h-[calc(100dvh-72px)] w-full overflow-hidden border-b border-black/5 lg:min-h-[calc(100dvh-96px)]">
         <img
           src="/about1.png"
           alt=""
@@ -87,34 +94,36 @@ export default function ShopPage() {
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/25 to-black/55" />
-        <div className="relative z-10 flex h-full min-h-0 flex-col">
-          <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
+        <div className="relative z-10 flex min-h-[inherit] flex-col pt-[env(safe-area-inset-top,0px)]">
+          <div className="flex flex-1 flex-col items-center justify-center px-4 pb-4 pt-6 text-center sm:px-6 sm:pb-6 sm:pt-8 md:px-8">
             <motion.div
-              className="max-w-2xl"
+              className="w-full max-w-2xl"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
             >
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#7FAF73]">T-REX Shop</p>
-              <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white md:text-5xl lg:text-[3.25rem] lg:leading-[1.1]">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7FAF73] sm:text-xs sm:tracking-[0.22em]">
+                DRIP Shop
+              </p>
+              <h1 className="mt-3 text-[1.75rem] font-semibold leading-[1.15] tracking-tight text-white sm:mt-4 sm:text-4xl md:text-5xl lg:text-[3.25rem] lg:leading-[1.1]">
                 Everyday carry,
                 <span className="text-white/85"> elevated.</span>
               </h1>
-              <p className="mt-5 text-base leading-relaxed text-white/90 md:text-lg">
+              <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/90 sm:mx-auto sm:mt-5 sm:text-base md:text-lg">
                 Premium tumblers built for motion, routine, and presence. Two signature finishes—designed to feel as
                 good as they look.
               </p>
-              <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+              <div className="mt-6 flex w-full flex-col items-stretch gap-3 sm:mt-8 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-4">
                 <button
                   type="button"
                   onClick={scrollToShop}
-                  className="inline-flex h-11 items-center justify-center rounded-full bg-[#7FAF73] px-8 text-xs font-semibold uppercase tracking-[0.18em] text-white transition-colors hover:bg-[#719D66]"
+                  className="inline-flex h-11 w-full items-center justify-center rounded-full bg-[#7FAF73] px-6 text-[10px] font-semibold uppercase tracking-[0.16em] text-white transition-colors hover:bg-[#719D66] sm:w-auto sm:px-8 sm:text-xs sm:tracking-[0.18em]"
                 >
                   View collection
                 </button>
                 <Link
                   to="/about"
-                  className="inline-flex h-11 items-center justify-center rounded-full border border-white/40 bg-white/10 px-8 text-xs font-semibold uppercase tracking-[0.16em] text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+                  className="inline-flex h-11 w-full items-center justify-center rounded-full border border-white/40 bg-white/10 px-6 text-[10px] font-semibold uppercase tracking-[0.14em] text-white backdrop-blur-sm transition-colors hover:bg-white/20 sm:w-auto sm:px-8 sm:text-xs sm:tracking-[0.16em]"
                 >
                   Our story
                 </Link>
@@ -122,7 +131,7 @@ export default function ShopPage() {
             </motion.div>
           </div>
 
-          <div className="flex shrink-0 justify-center pb-6 pt-2">
+          <div className="flex shrink-0 justify-center pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 sm:pb-6">
             <button
               type="button"
               onClick={scrollToShop}
@@ -156,19 +165,38 @@ export default function ShopPage() {
       </section>
 
       {/* Collection */}
-      <section id="collection" className="scroll-mt-24 border-b border-black/5 bg-white">
-        <div className="mx-auto max-w-7xl px-6 py-14 lg:px-12 lg:py-20">
+      <section id="collection" className="scroll-mt-20 border-b border-black/5 bg-white sm:scroll-mt-24">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 md:py-14 lg:px-12 lg:py-20">
           <div className="mx-auto max-w-2xl text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#7FAF73]">The collection</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-black md:text-4xl">Two drops. Zero filler.</h2>
-            <p className="mt-4 text-base text-black/65">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7FAF73] sm:text-xs sm:tracking-[0.22em]">
+              The collection
+            </p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-black sm:mt-3 sm:text-3xl md:text-4xl">
+              Two drops. Zero filler.
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-black/65 sm:mt-4 sm:text-base">
               We&apos;re intentionally starting small—two refined SKUs so we can obsess over fit, finish, and how each
               bottle feels in hand. More colors and accessories follow as we grow.
             </p>
           </div>
 
-          <div className="mx-auto mt-14 grid max-w-5xl grid-cols-1 gap-10 md:grid-cols-2 md:gap-12">
-            {catalog.map((product, index) => {
+          <div className="mx-auto mt-10 grid max-w-5xl grid-cols-1 gap-8 sm:mt-12 sm:gap-10 md:mt-14 md:grid-cols-2 md:gap-10 lg:gap-12">
+            {catalogLoading
+              ? [...Array(2)].map((_, index) => (
+                  <div
+                    key={`shop-skeleton-${index}`}
+                    className="flex animate-pulse flex-col overflow-hidden rounded-2xl border border-black/8 bg-white sm:rounded-3xl"
+                  >
+                    <div className="h-[220px] bg-slate-100 sm:h-[280px] md:h-[320px]" />
+                    <div className="space-y-4 px-4 py-5 sm:px-6 sm:py-6">
+                      <div className="h-6 w-2/3 rounded bg-slate-100" />
+                      <div className="h-4 w-full rounded bg-slate-100" />
+                      <div className="h-4 w-5/6 rounded bg-slate-100" />
+                      <div className="h-10 w-full rounded-full bg-slate-100" />
+                    </div>
+                  </div>
+                ))
+              : catalog.map((product, index) => {
               const inWishlist = wishlist.includes(product.id);
               const highlights = product.highlights?.slice(0, 2) ?? [];
 
@@ -180,60 +208,63 @@ export default function ShopPage() {
                   whileInView="visible"
                   viewport={{ once: true, amount: 0.25 }}
                   variants={fadeUp}
-                  className="group flex flex-col overflow-hidden rounded-3xl border border-black/8 bg-white shadow-[0_2px_40px_-12px_rgba(15,23,42,0.08)] transition-shadow duration-300 hover:shadow-[0_20px_60px_-24px_rgba(15,23,42,0.12)]"
+                  className="group flex flex-col overflow-hidden rounded-2xl border border-black/8 bg-white shadow-[0_2px_40px_-12px_rgba(15,23,42,0.08)] transition-shadow duration-300 sm:rounded-3xl hover:shadow-[0_20px_60px_-24px_rgba(15,23,42,0.12)]"
                 >
-                  <Link
-                    to={`/product/${product.slug}`}
-                    className="relative block overflow-hidden bg-gradient-to-b from-[#FAFCF9] to-white px-8 pb-2 pt-10"
-                  >
-                    <span className="absolute left-6 top-6 rounded-full bg-[#7FAF73]/12 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#4f8248]">
-                      {product.shortName || 'T-REX'}
-                    </span>
-                    <img
-                      src={product.images[0]}
-                      alt={product.name}
-                      className="mx-auto h-[300px] w-full object-contain transition-transform duration-500 ease-out group-hover:scale-[1.04]"
-                      onError={(e) => {
-                        e.currentTarget.onerror = null;
-                        e.currentTarget.src = product.fallbackImage;
+                  <div className="relative">
+                    <Link
+                      to={`/product/${product.slug}`}
+                      className="relative block overflow-hidden bg-gradient-to-b from-[#FAFCF9] to-white px-4 pb-2 pt-8 sm:px-6 sm:pt-9 md:px-8 md:pt-10"
+                    >
+                      <span className="absolute left-4 top-4 rounded-full bg-[#7FAF73]/12 px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-[#4f8248] sm:left-6 sm:top-6 sm:px-3 sm:py-1 sm:text-[10px] sm:tracking-[0.16em]">
+                        {product.shortName || 'DRIP'}
+                      </span>
+                      <img
+                        src={product.heroImage || product.images?.[0]}
+                        alt={product.name}
+                        className="mx-auto h-[220px] w-full object-contain transition-transform duration-500 ease-out group-hover:scale-[1.04] sm:h-[260px] md:h-[300px] lg:h-[320px]"
+                      />
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleWishlist(product.id);
                       }}
-                    />
-                  </Link>
+                      className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-white/90 text-[#7FAF73] shadow-sm backdrop-blur transition hover:bg-white sm:right-4 sm:top-4 sm:h-10 sm:w-10"
+                      aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+                    >
+                      {inWishlist ? (
+                        <FaHeart className="h-[18px] w-[18px]" aria-hidden />
+                      ) : (
+                        <FaRegHeart className="h-[18px] w-[18px] text-slate-600" aria-hidden />
+                      )}
+                    </button>
+                  </div>
 
-                  <div className="flex flex-1 flex-col px-6 pb-6 pt-2">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <h3 className="text-lg font-semibold text-black md:text-xl">{product.name}</h3>
-                        <div className="mt-2 flex items-center gap-2">
-                          <div className="flex text-[#7FAF73]">
-                            {[...Array(5)].map((_, i) => (
-                              <FaStar key={i} className="h-3.5 w-3.5" />
-                            ))}
-                          </div>
-                          <span className="text-sm text-black/50">
-                            {product.rating?.toFixed(1)} · {product.reviewCount ?? 0} reviews
-                          </span>
+                  <div className="flex flex-1 flex-col px-4 pb-5 pt-2 sm:px-6 sm:pb-6">
+                    <div>
+                      <h3 className="text-base font-semibold leading-snug text-black sm:text-lg md:text-xl">{product.name}</h3>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 sm:mt-2">
+                        <div className="flex shrink-0 text-[#7FAF73]">
+                          {[...Array(5)].map((_, i) => (
+                            <FaStar key={i} className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                          ))}
                         </div>
+                        <span className="text-xs text-black/50 sm:text-sm">
+                          {product.rating?.toFixed(1)} · {product.reviewCount ?? 0} reviews
+                        </span>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => toggleWishlist(product.id)}
-                        className={`shrink-0 rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] transition-colors ${
-                          inWishlist
-                            ? 'border-[#7FAF73] bg-[#7FAF73]/10 text-[#4f8248]'
-                            : 'border-black/15 text-black/60 hover:border-black/25'
-                        }`}
-                      >
-                        {inWishlist ? 'Saved' : 'Wishlist'}
-                      </button>
                     </div>
 
-                    <p className="mt-4 line-clamp-2 text-sm leading-relaxed text-black/65">{product.description}</p>
+                    <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-black/65 sm:mt-4 sm:line-clamp-2">
+                      {product.description}
+                    </p>
 
                     {highlights.length > 0 && (
-                      <ul className="mt-4 space-y-2 border-t border-black/6 pt-4">
+                      <ul className="mt-3 space-y-1.5 border-t border-black/6 pt-3 sm:mt-4 sm:space-y-2 sm:pt-4">
                         {highlights.map((h) => (
-                          <li key={h} className="flex items-start gap-2 text-sm text-black/75">
+                          <li key={h} className="flex items-start gap-2 text-xs text-black/75 sm:text-sm">
                             <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[#7FAF73]" />
                             {h}
                           </li>
@@ -241,24 +272,31 @@ export default function ShopPage() {
                       </ul>
                     )}
 
-                    <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-black/6 pt-6">
-                      <div>
-                        <span className="text-xl font-semibold text-black">{money(product.price)}</span>
-                        <span className="ml-2 text-sm text-black/40 line-through">{money(product.compareAtPrice)}</span>
+                    <div className="mt-5 flex flex-col gap-4 border-t border-black/6 pt-5 sm:mt-6 sm:pt-6">
+                      <div className="flex flex-wrap items-baseline gap-2">
+                        <span className="text-lg font-semibold text-black sm:text-xl">{money(product.price)}</span>
+                        <span className="text-xs text-black/40 line-through sm:text-sm">{money(product.compareAtPrice)}</span>
                       </div>
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:justify-end sm:gap-2">
                         <Link
                           to={`/product/${product.slug}`}
-                          className="inline-flex rounded-full border border-black/15 px-5 py-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-black/80 transition-colors hover:bg-black/[0.03]"
+                          className="inline-flex min-h-[40px] items-center justify-center rounded-full border border-black/15 px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-black/80 transition-colors hover:bg-black/[0.03] sm:min-h-0 sm:px-5 sm:py-2.5 sm:text-[10px] sm:tracking-[0.16em]"
                         >
                           Details
                         </Link>
                         <button
                           type="button"
                           onClick={() => addToCart(product.id, 1)}
-                          className="inline-flex rounded-full bg-[#7FAF73] px-5 py-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white transition-colors hover:bg-[#719D66]"
+                          className="inline-flex min-h-[40px] items-center justify-center rounded-full border border-[#7FAF73]/40 bg-white px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-[#4f8248] transition-colors hover:bg-[#7FAF73]/10 sm:min-h-0 sm:px-5 sm:py-2.5 sm:text-[10px] sm:tracking-[0.16em]"
                         >
                           Add to cart
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => goBuyNow(product.id)}
+                          className="col-span-2 inline-flex min-h-[42px] w-full items-center justify-center rounded-full bg-[#7FAF73] px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-white transition-colors hover:bg-[#719D66] sm:col-span-1 sm:min-h-0 sm:w-auto sm:px-5 sm:tracking-[0.16em]"
+                        >
+                          Buy now
                         </button>
                       </div>
                     </div>
@@ -270,18 +308,22 @@ export default function ShopPage() {
         </div>
       </section>
 
-      {/* Why T-REX */}
+      {/* Why DRIP */}
       <section className="border-b border-black/5 bg-[#F5FAF4]">
-        <div className="mx-auto max-w-7xl px-6 py-16 lg:px-12 lg:py-24">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 md:py-20 lg:px-12 lg:py-24">
           <div className="mx-auto max-w-2xl text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#7FAF73]">Why T-REX</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-black md:text-4xl">Precision you can feel</h2>
-            <p className="mt-4 text-base text-black/65">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7FAF73] sm:text-xs sm:tracking-[0.22em]">
+              Why DRIP
+            </p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-black sm:mt-3 sm:text-3xl md:text-4xl">
+              Precision you can feel
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-black/65 sm:mt-4 sm:text-base">
               We&apos;re not racing to fill shelves—we&apos;re building a carry system that earns a spot in your day.
             </p>
           </div>
 
-          <div className="mt-14 grid gap-8 md:grid-cols-3">
+          <div className="mt-10 grid grid-cols-1 gap-6 sm:mt-12 sm:gap-8 md:mt-14 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
             {WHY_TREX.map((item, i) => (
               <motion.div
                 key={item.title}
@@ -290,13 +332,13 @@ export default function ShopPage() {
                 whileInView="visible"
                 viewport={{ once: true, amount: 0.3 }}
                 variants={fadeUp}
-                className="rounded-2xl border border-black/6 bg-white p-8 shadow-sm"
+                className="rounded-2xl border border-black/6 bg-white p-6 shadow-sm sm:p-8"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#7FAF73]/12 text-[#4f8248]">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#7FAF73]/12 text-[#4f8248] sm:h-12 sm:w-12">
                   {item.icon}
                 </div>
-                <h3 className="mt-6 text-lg font-semibold text-black">{item.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-black/65">{item.body}</p>
+                <h3 className="mt-5 text-base font-semibold text-black sm:mt-6 sm:text-lg">{item.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-black/65 sm:mt-3">{item.body}</p>
               </motion.div>
             ))}
           </div>
@@ -305,26 +347,28 @@ export default function ShopPage() {
 
       {/* Trust + closing CTA */}
       <section className="bg-white">
-        <div className="mx-auto max-w-7xl px-6 py-14 lg:px-12 lg:py-20">
-          <div className="grid gap-10 border border-black/8 rounded-3xl bg-gradient-to-br from-white to-[#FAFCF9] p-8 md:grid-cols-3 md:gap-8 md:p-12">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-12 lg:py-20">
+          <div className="grid gap-8 rounded-2xl border border-black/8 bg-gradient-to-br from-white to-[#FAFCF9] p-6 sm:gap-10 sm:rounded-3xl sm:p-8 md:grid-cols-3 md:gap-8 md:p-10 lg:p-12">
             {TRUST_STRIP.map((item) => (
               <div key={item.title} className="text-center md:text-left">
-                <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-black">{item.title}</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-black sm:text-sm sm:tracking-[0.14em]">
+                  {item.title}
+                </h3>
                 <p className="mt-2 text-sm leading-relaxed text-black/60">{item.body}</p>
               </div>
             ))}
           </div>
 
-          <div className="mt-14 flex flex-col items-center justify-between gap-6 rounded-3xl bg-[#7FAF73] px-8 py-10 text-center md:flex-row md:text-left lg:px-14">
-            <div className="max-w-xl">
-              <h2 className="text-2xl font-semibold text-white md:text-3xl">Questions before you order?</h2>
+          <div className="mt-10 flex flex-col items-stretch gap-6 rounded-2xl bg-[#7FAF73] px-5 py-8 text-center sm:mt-12 sm:items-center sm:rounded-3xl sm:px-8 sm:py-10 md:flex-row md:items-center md:justify-between md:text-left lg:px-14">
+            <div className="max-w-xl md:flex-1">
+              <h2 className="text-xl font-semibold text-white sm:text-2xl md:text-3xl">Questions before you order?</h2>
               <p className="mt-2 text-sm leading-relaxed text-white/90">
                 We&apos;d rather earn your trust with clarity than rush a sale. Reach out—we read every message.
               </p>
             </div>
             <Link
               to="/contact"
-              className="inline-flex shrink-0 items-center justify-center rounded-full bg-white px-8 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#2d5a28] shadow-sm transition-colors hover:bg-white/95"
+              className="inline-flex w-full shrink-0 items-center justify-center rounded-full bg-white px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#2d5a28] shadow-sm transition-colors hover:bg-white/95 sm:w-auto sm:px-8 sm:text-xs sm:tracking-[0.18em]"
             >
               Contact us
             </Link>

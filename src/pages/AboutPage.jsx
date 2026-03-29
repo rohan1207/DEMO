@@ -104,17 +104,26 @@ const AboutUs = () => {
     );
   };
 
-  // Auto-slide effect for mobile testimonials
+  // Auto-advance testimonials on small screens only
   useEffect(() => {
-    if (window.innerWidth < 768) {
-      // Only run on mobile
-      const timer = setInterval(() => {
-        showNextTestimonial();
-      }, 3000); // Change testimonial every 3 seconds
-
-      return () => clearInterval(timer);
-    }
-  }, [currentTestimonialIndex]);
+    const mq = window.matchMedia("(max-width: 767px)");
+    let intervalId;
+    const start = () => {
+      if (intervalId) clearInterval(intervalId);
+      intervalId = null;
+      if (mq.matches) {
+        intervalId = setInterval(() => {
+          setCurrentTestimonialIndex((prev) => (prev + 1) % testimonials.length);
+        }, 3500);
+      }
+    };
+    start();
+    mq.addEventListener("change", start);
+    return () => {
+      mq.removeEventListener("change", start);
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, []);
 
   // Restaurant Facilities data
   const facilities = [
@@ -353,7 +362,7 @@ const AboutUs = () => {
   return (
     <div
       ref={pageRef}
-      className="relative font-['Plus_Jakarta_Sans'] text-black"
+      className="relative font-['Plus_Jakarta_Sans'] text-black pb-[env(safe-area-inset-bottom,0px)]"
     >
       {/* ABOUT SECTION */}
       <div
@@ -373,7 +382,7 @@ const AboutUs = () => {
           />
         </div>
 
-        <div className="container mx-auto px-6 py-16">
+        <div className="container mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 md:py-20">
           {/* Header */}
           <motion.div
             className="text-center"
@@ -381,32 +390,27 @@ const AboutUs = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-black mb-4 tracking-[0.12em] px-4">
+            <h2 className="mb-3 text-2xl font-bold tracking-[0.1em] text-black sm:mb-4 sm:text-3xl sm:tracking-[0.12em] md:text-4xl lg:text-5xl">
               ABOUT US
             </h2>
-            <div className="flex items-center justify-center gap-2 md:gap-4 px-4">
-              <div className="w-8 md:w-12 h-0.5 bg-[#7FAF73]"></div>
-              <span className="text-[#7FAF73] font-semibold text-xs md:text-sm tracking-widest">
+            <div className="flex items-center justify-center gap-2 px-2 sm:gap-3 md:gap-4">
+              <div className="h-0.5 w-6 bg-[#7FAF73] sm:w-8 md:w-12"></div>
+              <span className="text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-[#7FAF73] sm:text-xs sm:tracking-widest md:text-sm">
                 T-REX BRAND PHILOSOPHY
               </span>
-              <div className="w-8 md:w-12 h-0.5 bg-[#7FAF73]"></div>
+              <div className="h-0.5 w-6 bg-[#7FAF73] sm:w-8 md:w-12"></div>
             </div>
           </motion.div>
 
-          <div className="flex flex-col items-center gap-8 md:gap-16 mt-8 md:mt-0">
+          <div className="mt-8 flex flex-col items-center gap-8 md:mt-0 md:gap-12 lg:gap-16">
             {/* Image Stack */}
             <div
-              className="relative w-full flex justify-center items-center h-[400px] md:h-[600px]"
+              className="relative flex h-[min(78vw,340px)] w-full items-center justify-center sm:h-[400px] md:h-[520px] lg:h-[600px]"
               ref={imageStackRef}
             >
-              {/* Back Image - Paneer Tikka */}
+              {/* Back Image */}
               <motion.div
-                className="food-image absolute w-[90%] md:w-[850px] h-[300px] md:h-[550px] z-10"
-                style={{
-                  top: "40px",
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                }}
+                className="food-image absolute left-1/2 top-6 z-10 h-[220px] w-[92%] max-w-[900px] -translate-x-1/2 sm:top-8 sm:h-[300px] md:top-10 md:h-[450px] md:w-[850px] lg:h-[550px]"
               >
                 <div className="w-full h-full bg-white rounded-md shadow-2xl overflow-hidden">
                   <motion.img
@@ -423,17 +427,9 @@ const AboutUs = () => {
                 </div>
               </motion.div>
 
-              {/* Front Image - Spring Rolls */}
+              {/* Front Image */}
               <motion.div
-                className="food-image absolute w-[65%] md:w-[500px] h-[200px] md:h-[350px] z-20"
-                style={{
-                  top: "260px",
-                  right: "2%",
-                  "@media (min-width: 768px)": {
-                    top: "350px",
-                    right: "calc(50% - 450px)",
-                  },
-                }}
+                className="food-image absolute right-[2%] top-[190px] z-20 h-[160px] w-[68%] max-w-[500px] sm:top-[220px] sm:h-[200px] md:right-[calc(50%-450px)] md:top-[340px] md:h-[350px] md:w-[500px] lg:right-[calc(50%-480px)]"
               >
                 <div className="w-full h-full bg-white rounded-md shadow-2xl overflow-hidden">
                   <motion.img
@@ -450,29 +446,17 @@ const AboutUs = () => {
                 </div>
               </motion.div>
 
-              {/* 16 Years Badge */}
-              <div
-                className="badge-16 absolute z-30"
-                style={{
-                  top: "10px",
-                  left: "10px",
-                  "@media (min-width: 768px)": {
-                    top: "30px",
-                    left: "calc(50% - 500px)",
-                  },
-                }}
-              >
-               
-              </div>
+              {/* Badge anchor (animations target .badge-16) */}
+              <div className="badge-16 absolute left-3 top-3 z-30 md:left-[calc(50%-500px)] md:top-8" />
             </div>
 
             {/* Quote Section */}
-            <div className="w-full max-w-2xl quote-section mt-8 px-4 md:px-0">
-              <div className="relative flex flex-col md:flex-row items-start gap-4">
+            <div className="quote-section mt-6 w-full max-w-2xl px-1 sm:mt-8 sm:px-4 md:mt-10 md:px-0">
+              <div className="relative flex flex-col items-start gap-4 md:flex-row md:gap-6">
                 {/* Quote Icon */}
-                <div className="flex-shrink-0 w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-[#7FAF73] to-[#719D66] rounded-full flex items-center justify-center shadow-lg mt-2">
+                <div className="mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#7FAF73] to-[#719D66] shadow-lg sm:h-12 sm:w-12 md:mt-2 md:h-16 md:w-16">
                   <svg
-                    className="w-6 h-6 md:w-8 md:h-8 text-white"
+                    className="h-5 w-5 text-white sm:h-6 sm:w-6 md:h-8 md:w-8"
                     fill="currentColor"
                     viewBox="0 0 24 24"
                   >
@@ -481,8 +465,8 @@ const AboutUs = () => {
                 </div>
 
                 {/* Quote Text */}
-                <div className="flex-grow mt-4 md:mt-10">
-                  <p className="text-base md:text-xl text-black/80 leading-relaxed font-light">
+                <div className="mt-2 flex-grow md:mt-10">
+                  <p className="text-sm font-light leading-relaxed text-black/80 sm:text-base md:text-lg lg:text-xl">
                     At T-REX, we engineer everyday carry. We operate on a simple
                     principle - essentials should perform at a higher standard,
                     not just in function, but in presence.{" "}
@@ -491,9 +475,9 @@ const AboutUs = () => {
                     </span>
                   </p>
 
-                  <div className="flex items-center gap-4 mt-4">
-                    <div className="w-12 h-0.5 bg-[#7FAF73]"></div>
-                    <p className="text-md text-black/70 font-medium">T-REX</p>
+                  <div className="mt-4 flex items-center gap-3 sm:gap-4">
+                    <div className="h-0.5 w-10 bg-[#7FAF73] sm:w-12"></div>
+                    <p className="text-sm font-medium text-black/70 sm:text-base">T-REX</p>
                   </div>
                 </div>
               </div>
@@ -505,7 +489,7 @@ const AboutUs = () => {
       {/* METRICS RIBBON — roll up + count when in view */}
       <motion.section
         ref={metricsRibbonRef}
-        className="relative overflow-hidden bg-[#7FAF73] py-12 sm:py-14 px-4 border-y border-white/25"
+        className="relative overflow-hidden border-y border-white/25 bg-[#7FAF73] px-3 py-10 sm:px-4 sm:py-12 md:py-14"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true, amount: 0.45 }}
@@ -513,7 +497,7 @@ const AboutUs = () => {
       >
         <div className="max-w-7xl mx-auto">
           <motion.p
-            className="text-center text-white/90 text-xs font-semibold tracking-[0.22em] uppercase mb-10"
+                className="mb-8 text-center text-[10px] font-semibold uppercase tracking-[0.18em] text-white/90 sm:mb-10 sm:text-xs sm:tracking-[0.22em]"
             initial={{ y: 20, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             viewport={{ once: true, amount: 0.6 }}
@@ -521,7 +505,7 @@ const AboutUs = () => {
           >
             By the numbers
           </motion.p>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-6 lg:gap-8">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-4 lg:gap-8">
             {METRICS.map((m, i) => (
               <motion.div
                 key={m.id}
@@ -535,7 +519,7 @@ const AboutUs = () => {
                   ease: [0.22, 1, 0.36, 1],
                 }}
               >
-                <div className="text-3xl sm:text-4xl md:text-[2.65rem] font-bold text-white mb-2 leading-none tracking-tight">
+                <div className="mb-1.5 text-2xl font-bold leading-none tracking-tight text-white sm:mb-2 sm:text-3xl md:text-[2.65rem]">
                   <MetricRollValue
                     end={m.value}
                     suffix={m.suffix}
@@ -544,7 +528,7 @@ const AboutUs = () => {
                     delay={0.2 + i * 0.14}
                   />
                 </div>
-                <p className="text-xs sm:text-sm text-white/85 font-medium leading-snug max-w-[11rem] mx-auto">
+                <p className="mx-auto max-w-[10rem] text-[11px] font-medium leading-snug text-white/85 sm:max-w-[11rem] sm:text-xs md:text-sm">
                   {m.label}
                 </p>
               </motion.div>
@@ -554,26 +538,26 @@ const AboutUs = () => {
       </motion.section>
 
       {/* BRAND PRINCIPLES SECTION */}
-      <div className="bg-white py-16 px-4">
-        <div className="max-w-7xl mx-auto">
+      <div className="bg-white px-4 py-12 sm:px-6 sm:py-16 md:py-20">
+        <div className="mx-auto max-w-7xl">
           {/* Header */}
           <motion.div
-            className="text-center mb-16"
+            className="mb-10 text-center sm:mb-12 md:mb-16"
             initial={{ opacity: 0, y: -30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            <div className="text-[#7FAF73] text-sm font-medium tracking-widest mb-2">
+            <div className="mb-2 text-[11px] font-medium tracking-widest text-[#7FAF73] sm:text-sm">
               - T-REX PRINCIPLES -
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-black tracking-tight">
+            <h1 className="text-2xl font-bold tracking-tight text-black sm:text-3xl md:text-4xl lg:text-5xl">
               BUILT TO PERFORM
             </h1>
           </motion.div>
 
           {/* Facilities Grid */}
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+            className="grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 md:gap-8 lg:grid-cols-3"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -581,13 +565,13 @@ const AboutUs = () => {
             {facilities.map((facility, index) => (
               <motion.div
                 key={facility.id}
-                className="bg-white rounded-md overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
+                className="overflow-hidden rounded-md bg-white shadow-lg transition-shadow duration-300 hover:shadow-xl"
                 variants={cardVariants}
                 whileHover={{ y: -5 }}
               >
                 {/* Image Container */}
                 <motion.div
-                  className="relative h-64 overflow-hidden"
+                  className="relative h-52 overflow-hidden sm:h-60 md:h-64"
                   variants={imageVariants}
                   initial="rest"
                   whileHover="hover"
@@ -605,15 +589,15 @@ const AboutUs = () => {
 
                 {/* Content */}
                 <motion.div
-                  className="p-6 text-center"
+                  className="p-6 text-center sm:p-7"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.4 + index * 0.1 }}
                 >
-                  <h3 className="text-xl font-bold text-black mb-4 tracking-wide">
+                  <h3 className="mb-3 text-base font-bold tracking-wide text-black sm:mb-4 sm:text-lg md:text-xl">
                     {facility.title}
                   </h3>
-                  <p className="text-black/70 leading-relaxed">
+                  <p className="text-sm leading-relaxed text-black/70 sm:text-base">
                     {facility.description}
                   </p>
                 </motion.div>
@@ -623,51 +607,51 @@ const AboutUs = () => {
 
           {/* Decorative elements */}
           <motion.div
-            className="flex justify-center mt-12"
+            className="mt-10 flex justify-center sm:mt-12"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 1, duration: 0.6 }}
           >
-            <div className="w-16 h-1 bg-[#7FAF73] rounded-full"></div>
+            <div className="h-1 w-14 rounded-full bg-[#7FAF73] sm:w-16"></div>
           </motion.div>
         </div>
       </div>
 
       {/* ABOUT BRAND SECTION */}
-      <div className="bg-[#F5FAF4] py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="max-w-7xl mx-auto">
+      <div className="overflow-hidden bg-[#F5FAF4] px-4 py-14 sm:px-6 sm:py-16 md:py-20 lg:px-8">
+        <div className="mx-auto max-w-7xl">
           <div className="relative">
-            {/* Background text */}
-            <div className="hidden lg:block absolute -right-20 top-1/2 transform -translate-y-1/2">
-              <span className="text-9xl font-extrabold text-[#7FAF73]/20 transform -rotate-90 whitespace-nowrap">
-                DELICIOUS DINING
+            {/* Background text — large screens only */}
+            <div className="pointer-events-none absolute -right-2 top-1/2 hidden -translate-y-1/2 lg:block xl:-right-10">
+              <span className="block origin-center rotate-[-90deg] whitespace-nowrap text-6xl font-extrabold text-[#7FAF73]/15 xl:text-8xl">
+                T-REX
               </span>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
               {/* Left Content */}
               <div className="relative z-10">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-0.5 bg-[#7FAF73]"></div>
-                  <span className="text-[#7FAF73] font-semibold text-sm tracking-widest">
+                <div className="mb-3 flex items-center gap-3 sm:mb-4 sm:gap-4">
+                  <div className="h-0.5 w-10 bg-[#7FAF73] sm:w-12"></div>
+                  <span className="text-xs font-semibold tracking-widest text-[#7FAF73] sm:text-sm">
                     ABOUT T-REX
                   </span>
                 </div>
-                <h2 className="text-4xl font-bold text-black mb-6 leading-tight">
+                <h2 className="mb-5 text-2xl font-bold leading-tight text-black sm:mb-6 sm:text-3xl md:text-4xl">
                   PRECISION IN EVERY
                   <br />
                   EVERYDAY ESSENTIAL
                 </h2>
-                <p className="text-black/70 mb-8">
+                <p className="mb-6 text-sm leading-relaxed text-black/70 sm:mb-8 sm:text-base">
                   Every T-REX product is built through a deliberate process:
                   clean design, structural durability, and seamless usability.
                   We design for consistency, reliability, and long-term use.
                 </p>
 
                 {/* Review Box */}
-                <div className="bg-white p-6 rounded-md shadow-lg mb-8 inline-block">
-                  <div className="flex items-center gap-4">
-                    <span className="text-4xl font-bold text-black">
+                <div className="mb-6 inline-block w-full max-w-sm rounded-md bg-white p-5 shadow-lg sm:mb-8 sm:p-6">
+                  <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                    <span className="text-3xl font-bold text-black sm:text-4xl">
                       100%
                     </span>
                     <div>
@@ -678,29 +662,29 @@ const AboutUs = () => {
                         <FaStar />
                         <FaStar />
                       </div>
-                      <p className="text-black/60 text-sm">
+                      <p className="text-xs text-black/60 sm:text-sm">
                         Design-first execution
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 text-black/70">
-                  <FaHeart className="text-[#7FAF73]" />
+                <div className="flex flex-wrap items-center gap-2 text-sm text-black/70 sm:text-base">
+                  <FaHeart className="shrink-0 text-[#7FAF73]" />
                   <span>Built to perform. Designed to represent.</span>
                 </div>
               </div>
 
               {/* Right Content - Images */}
-              <div className="relative h-[400px] sm:h-[600px] mt-8 sm:mt-0">
+              <div className="relative mt-6 h-[min(70vw,320px)] sm:mt-0 sm:h-[420px] md:h-[520px] lg:h-[600px]">
                 <img
                   src="/middle.png"
-                  alt="Chef"
-                  className="absolute z-10 w-full h-full object-contain scale-90 sm:scale-100"
+                  alt=""
+                  className="absolute z-10 h-full w-full scale-95 object-contain sm:scale-100"
                 />
 
                 {/* Decorative background circle */}
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[280px] sm:w-[500px] h-[280px] sm:h-[500px] bg-[#7FAF73]/15 rounded-full"></div>
+                <div className="absolute left-1/2 top-1/2 h-[220px] w-[220px] -translate-x-1/2 -translate-y-1/2 transform rounded-full bg-[#7FAF73]/15 sm:h-[360px] sm:w-[360px] md:h-[440px] md:w-[440px] lg:h-[500px] lg:w-[500px]"></div>
 
               
 
@@ -712,101 +696,32 @@ const AboutUs = () => {
       </div>
 
       {/* TESTIMONIALS SECTION */}
-      <div className="bg-gradient-to-br from-white via-[#FAFCF9] to-[#F3F8F2] py-20 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 mb-16">
+      <div className="overflow-hidden bg-gradient-to-br from-white via-[#FAFCF9] to-[#F3F8F2] py-12 sm:py-16 md:py-20">
+        <div className="mx-auto mb-10 max-w-7xl px-4 sm:mb-12 sm:px-6 md:mb-16">
           {/* Header */}
           <motion.div
-            className="text-center mb-16"
+            className="text-center"
             initial={{ opacity: 0, y: -30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            <div className="text-[#7FAF73] text-sm font-medium tracking-widest mb-2">
+            <div className="mb-2 text-[11px] font-medium tracking-widest text-[#7FAF73] sm:text-sm">
               - WHY T-REX -
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-black tracking-tight">
+            <h1 className="text-2xl font-bold tracking-tight text-black sm:text-3xl md:text-4xl lg:text-5xl">
               DESIGNED TO REPRESENT
             </h1>
-            <div className="flex items-center justify-center mt-4">
-              <div className="flex text-[#7FAF73] text-2xl">
+            <div className="mx-auto mt-4 flex max-w-2xl flex-col items-center justify-center gap-3 sm:mt-5 sm:flex-row sm:gap-4 md:mt-6">
+              <div className="flex shrink-0 text-lg text-[#7FAF73] sm:text-xl md:text-2xl">
                 <FaStar />
                 <FaStar />
                 <FaStar />
                 <FaStar />
                 <FaStar />
               </div>
-              <span className="ml-3 text-black/70 font-medium">
-                Not just hydration - control, clarity, and intent in motion.
+              <span className="text-center text-sm font-medium leading-snug text-black/70 sm:text-left sm:text-base">
+                Not just hydration — control, clarity, and intent in motion.
               </span>
-            </div>
-
-            {/* Mobile Navigation Arrows */}
-            <div className="flex justify-center items-center gap-4 mt-6 md:hidden">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-[#7FAF73] border border-black/5"
-                onClick={() => {
-                  const cards = document.querySelectorAll(
-                    ".testimonial-card-mobile"
-                  );
-                  const activeCard = document.querySelector(
-                    ".testimonial-card-mobile.active"
-                  );
-                  const currentIndex = Array.from(cards).indexOf(activeCard);
-                  const prevIndex =
-                    (currentIndex - 1 + cards.length) % cards.length;
-                  activeCard.classList.remove("active");
-                  cards[prevIndex].classList.add("active");
-                }}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-[#7FAF73] border border-black/5"
-                onClick={() => {
-                  const cards = document.querySelectorAll(
-                    ".testimonial-card-mobile"
-                  );
-                  const activeCard = document.querySelector(
-                    ".testimonial-card-mobile.active"
-                  );
-                  const currentIndex = Array.from(cards).indexOf(activeCard);
-                  const nextIndex = (currentIndex + 1) % cards.length;
-                  activeCard.classList.remove("active");
-                  cards[nextIndex].classList.add("active");
-                }}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </motion.button>
             </div>
           </motion.div>
         </div>
@@ -836,7 +751,7 @@ const AboutUs = () => {
             {testimonials.map((testimonial) => (
               <motion.div
                 key={`desktop-${testimonial.id}`}
-                className="flex-shrink-0 w-96 bg-white rounded-md shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 mx-3"
+                className="mx-2 w-[min(100%,320px)] shrink-0 rounded-md bg-white p-5 shadow-lg transition-shadow duration-300 hover:shadow-xl sm:mx-3 sm:w-80 sm:p-6 md:w-96"
                 whileHover={{ y: -5, scale: 1.02 }}
                 transition={{ duration: 0.3 }}
               >
@@ -877,7 +792,7 @@ const AboutUs = () => {
             {testimonials.map((testimonial) => (
               <motion.div
                 key={`desktop-second-${testimonial.id}`}
-                className="flex-shrink-0 w-96 bg-white rounded-md shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 mx-3"
+                className="mx-2 w-[min(100%,320px)] shrink-0 rounded-md bg-white p-5 shadow-lg transition-shadow duration-300 hover:shadow-xl sm:mx-3 sm:w-80 sm:p-6 md:w-96"
                 whileHover={{ y: -5, scale: 1.02 }}
                 transition={{ duration: 0.3 }}
               >
@@ -917,60 +832,12 @@ const AboutUs = () => {
           </motion.div>
 
           {/* Desktop Gradient Overlays */}
-          <div className="absolute top-0 left-0 w-32 h-full bg-gradient-to-r from-[#FAFCF9] to-transparent pointer-events-none z-10"></div>
-          <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-[#FAFCF9] to-transparent pointer-events-none z-10"></div>
-        </div>
-
-        {/* Mobile Navigation Arrows */}
-        <div className="md:hidden relative px-4 mb-8">
-          <div className="flex justify-between items-center">
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={showPrevTestimonial}
-              className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-[#7FAF73] border border-black/5 z-20"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={showNextTestimonial}
-              className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center text-[#7FAF73] border border-black/5 z-20"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </motion.button>
-          </div>
+          <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-16 bg-gradient-to-r from-[#FAFCF9] to-transparent sm:w-24 md:w-32"></div>
+          <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-16 bg-gradient-to-l from-[#FAFCF9] to-transparent sm:w-24 md:w-32"></div>
         </div>
 
         {/* Mobile Single Card View */}
-        <div className="md:hidden relative px-4">
+        <div className="relative px-4 pb-2 md:hidden">
           <div className="overflow-hidden">
             <AnimatePresence mode="wait">
               <motion.div
@@ -979,17 +846,17 @@ const AboutUs = () => {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -50 }}
                 transition={{ duration: 0.3 }}
-                className="w-full bg-white rounded-md shadow-lg p-6 mx-auto"
+                className="mx-auto w-full max-w-lg rounded-md bg-white p-5 shadow-lg sm:p-6"
               >
-                <div className="flex text-[#7FAF73] mb-4">
+                <div className="mb-4 flex text-[#7FAF73]">
                   {[...Array(testimonials[currentTestimonialIndex].rating)].map(
                     (_, i) => (
                       <FaStar key={i} className="text-sm" />
                     )
                   )}
                 </div>
-                <p className="text-black/80 leading-relaxed mb-4 text-sm">
-                  "{testimonials[currentTestimonialIndex].review}"
+                <p className="mb-4 text-sm leading-relaxed text-black/80">
+                  &ldquo;{testimonials[currentTestimonialIndex].review}&rdquo;
                 </p>
                 <div className="border-t pt-4">
                   <div className="flex items-center justify-between">
@@ -1019,9 +886,61 @@ const AboutUs = () => {
           </div>
         </div>
 
+        {/* Mobile prev / next */}
+        <div className="relative mt-5 px-4 md:hidden">
+          <div className="mx-auto flex max-w-lg items-center justify-between">
+            <motion.button
+              type="button"
+              aria-label="Previous testimonial"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={showPrevTestimonial}
+              className="z-20 flex h-11 w-11 items-center justify-center rounded-full border border-black/5 bg-white text-[#7FAF73] shadow-md"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </motion.button>
+            <motion.button
+              type="button"
+              aria-label="Next testimonial"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={showNextTestimonial}
+              className="z-20 flex h-11 w-11 items-center justify-center rounded-full border border-black/5 bg-white text-[#7FAF73] shadow-md"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </motion.button>
+          </div>
+        </div>
+
         {/* Bottom decorative element */}
-        <div className="flex justify-center mt-12">
-          <div className="w-16 h-1 bg-gradient-to-r from-[#7FAF73] to-[#719D66] rounded-full"></div>
+        <div className="mt-8 flex justify-center px-4 sm:mt-12">
+          <div className="h-1 w-14 rounded-full bg-gradient-to-r from-[#7FAF73] to-[#719D66] sm:w-16"></div>
         </div>
       </div>
 

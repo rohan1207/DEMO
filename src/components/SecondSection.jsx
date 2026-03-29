@@ -87,7 +87,7 @@ const SecondSection = () => {
           >
             <img
               src="/middle.png"
-              alt="T-Rex Tumbler"
+              alt="T-REX Tumbler"
               className="w-full h-full object-cover rounded-md drop-shadow-2xl"
               loading="lazy"
               decoding="async"

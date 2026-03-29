@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import DripPreloader from '../components/drip/DripPreloader';
+import DRIPPreloader from '../components/DRIP/DRIPPreloader';
 import { useSequencePreload } from '../hooks/useSequencePreload';
 
 export default function LandingPage() {
@@ -17,7 +17,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <DripPreloader percent={percent} visible onVideoEnd={() => setVideoEnded(true)} />
+      <DRIPPreloader percent={percent} visible onVideoEnd={() => setVideoEnded(true)} />
     </div>
   );
 }

@@ -21,7 +21,7 @@ const firstTenMobileSectionVh = (MOBILE_SCROLL_TOTAL - lastMobileSectionVh) / 10
  * animation (last frame) is reached, the canvas is "unsticky" (hidden) so content below
  * (DummySection, Footer in App) is fully visible. Footer lives in App.jsx only.
  */
-export default function DripLandingSequence({ frames, sequenceReady }) {
+export default function DRIPLandingSequence({ frames, sequenceReady }) {
   const sequenceBlockRef = useRef(null);
   const canvasRef = useRef(null);
   const ctaRef = useRef(null);
@@ -128,7 +128,7 @@ export default function DripLandingSequence({ frames, sequenceReady }) {
 
     // Premium horizontal parallax reveal for text blocks
     // scrub: 0.6 adds a small lag that smooths out fast/jerky scrolls
-    gsap.utils.toArray('.drip-parallax-left').forEach((el) => {
+    gsap.utils.toArray('.DRIP-parallax-left').forEach((el) => {
       gsap.fromTo(
         el,
         { xPercent: 20, opacity: 0 },
@@ -147,7 +147,7 @@ export default function DripLandingSequence({ frames, sequenceReady }) {
       );
     });
 
-    gsap.utils.toArray('.drip-parallax-right').forEach((el) => {
+    gsap.utils.toArray('.DRIP-parallax-right').forEach((el) => {
       gsap.fromTo(
         el,
         { xPercent: -20, opacity: 0 },
@@ -167,9 +167,9 @@ export default function DripLandingSequence({ frames, sequenceReady }) {
     });
 
     if (mobile) {
-      gsap.utils.toArray('.drip-mobile-section-inner').forEach((el) => {
-        const section = el.closest('.drip-mobile-section');
-        if (!section || section.classList.contains('drip-mobile-section--final')) return;
+      gsap.utils.toArray('.DRIP-mobile-section-inner').forEach((el) => {
+        const section = el.closest('.DRIP-mobile-section');
+        if (!section || section.classList.contains('DRIP-mobile-section--final')) return;
         gsap.fromTo(
           el,
           { y: 56, opacity: 0 },
@@ -205,23 +205,23 @@ export default function DripLandingSequence({ frames, sequenceReady }) {
   };
   if (!sequenceReady) {
     return (
-      <div className="drip-landing-sequence-container h-screen bg-black flex items-center justify-center">
+      <div className="DRIP-landing-sequence-container h-screen bg-black flex items-center justify-center">
         <p className="text-black">Loading sequence…</p>
       </div>
     );
   }
 
   return (
-    <div className="drip-landing-sequence-container">
+    <div className="DRIP-landing-sequence-container">
       {/* Wrapper so sequence + footer sit above the fixed canvas and are visible when you scroll past the frames */}
-      <div className="drip-sequence-content-wrapper">
-      <div ref={sequenceBlockRef} className="drip-sequence-block">
+      <div className="DRIP-sequence-content-wrapper">
+      <div ref={sequenceBlockRef} className="DRIP-sequence-block">
         {/* Desktop (≥1082px): section-wise overlay; scroll drives frames */}
         <div className="hidden min-[1082px]:block">
           {/* Section 0 – hero copy kept away from center product */}
           <section className="min-h-screen w-full flex items-center px-6 lg:px-24">
             <div className="mx-auto flex w-full max-w-6xl items-center justify-between">
-              <div className="drip-parallax-left max-w-sm space-y-7">
+              <div className="DRIP-parallax-left max-w-sm space-y-7">
                 <h1 className="text-6xl md:text-7xl lg:text-8xl font-semibold tracking-tight text-gray-900 leading-tight">
                   A better
                 </h1>
@@ -241,7 +241,7 @@ export default function DripLandingSequence({ frames, sequenceReady }) {
           {/* Section 1 – left copy */}
           <section className="min-h-screen w-full flex items-center px-6 lg:px-24">
             <div className="mx-auto flex w-full max-w-6xl items-center justify-between">
-              <div className="drip-parallax-left max-w-md space-y-7">
+              <div className="DRIP-parallax-left max-w-md space-y-7">
                 <h2 className="text-5xl md:text-6xl lg:text-[3.6rem] font-semibold tracking-tight text-gray-900 leading-tight">
                   Designed for<br />everyday carry
                 </h2>
@@ -257,7 +257,7 @@ export default function DripLandingSequence({ frames, sequenceReady }) {
           <section className="min-h-screen w-full flex items-center px-6 lg:px-24">
             <div className="mx-auto flex w-full max-w-6xl items-center justify-between">
               <div className="hidden md:flex flex-1" />
-              <div className="drip-parallax-right max-w-md space-y-7 text-right">
+              <div className="DRIP-parallax-right max-w-md space-y-7 text-right">
                 <div className="space-y-1">
                   <h1 className="text-6xl md:text-7xl lg:text-[4rem] font-semibold tracking-tight text-gray-900 leading-tight">
                     Sleek
@@ -276,7 +276,7 @@ export default function DripLandingSequence({ frames, sequenceReady }) {
           {/* Section 3 – left copy */}
           <section className="min-h-screen w-full flex items-center px-6 lg:px-24">
             <div className="mx-auto flex w-full max-w-6xl items-center justify-between">
-              <div className="drip-parallax-left max-w-md space-y-7">
+              <div className="DRIP-parallax-left max-w-md space-y-7">
                 <p className="text-lg md:text-xl lg:text-2xl text-gray-700 leading-snug">
                   A thoughtfully designed lid handle<br />keeps your grip secure and comfortable,<br />from commute to weekend.
                 </p>
@@ -289,7 +289,7 @@ export default function DripLandingSequence({ frames, sequenceReady }) {
           <section className="min-h-screen w-full flex items-center px-6 lg:px-24">
             <div className="mx-auto flex w-full max-w-6xl items-center justify-between">
               <div className="hidden md:flex flex-1" />
-              <div className="drip-parallax-right max-w-md space-y-7 text-right">
+              <div className="DRIP-parallax-right max-w-md space-y-7 text-right">
                 <div className="space-y-1">
                   <h1 className="text-6xl md:text-7xl lg:text-[4rem] font-semibold tracking-tight text-gray-900 leading-tight">
                     Flip-top
@@ -313,7 +313,7 @@ export default function DripLandingSequence({ frames, sequenceReady }) {
           {/* Section 5 – left copy */}
           <section className="min-h-screen w-full flex items-center px-6 lg:px-24">
             <div className="mx-auto flex w-full max-w-6xl items-center justify-between">
-              <div className="drip-parallax-left max-w-md space-y-7">
+              <div className="DRIP-parallax-left max-w-md space-y-7">
                 <div className="space-y-1">
                   <h1 className="text-6xl md:text-7xl lg:text-[4rem] font-semibold tracking-tight text-gray-900 leading-tight">
                     Direct
@@ -334,7 +334,7 @@ export default function DripLandingSequence({ frames, sequenceReady }) {
           <section className="min-h-screen w-full flex items-center px-6 lg:px-24">
             <div className="mx-auto flex w-full max-w-6xl items-center justify-between">
               <div className="hidden md:flex flex-1" />
-              <div className="drip-parallax-right max-w-md space-y-7 text-right">
+              <div className="DRIP-parallax-right max-w-md space-y-7 text-right">
                 <h1 className="text-5xl md:text-6xl lg:text-[3.4rem] font-semibold tracking-tight text-gray-900 leading-tight">
                   Built‑in straw
                 </h1>
@@ -348,7 +348,7 @@ export default function DripLandingSequence({ frames, sequenceReady }) {
           {/* Section 7 – left copy */}
           <section className="min-h-screen w-full flex items-center px-6 lg:px-24">
             <div className="mx-auto flex w-full max-w-6xl items-center justify-between">
-              <div className="drip-parallax-left max-w-md space-y-5">
+              <div className="DRIP-parallax-left max-w-md space-y-5">
                 <h1 className="text-5xl md:text-6xl lg:text-[3.4rem] font-semibold tracking-tight text-gray-900 leading-tight">
                   Total capacity
                 </h1>
@@ -364,7 +364,7 @@ export default function DripLandingSequence({ frames, sequenceReady }) {
           <section className="min-h-screen w-full flex items-center px-6 lg:px-24">
             <div className="mx-auto flex w-full max-w-6xl items-center justify-between">
               <div className="hidden md:flex flex-1" />
-              <div className="drip-parallax-right max-w-md space-y-7 text-right">
+              <div className="DRIP-parallax-right max-w-md space-y-7 text-right">
                 <div className="space-y-1">
                   <h2 className="text-5xl md:text-6xl lg:text-[3.4rem] font-semibold tracking-tight text-gray-900 leading-tight">
                     Stable
@@ -386,7 +386,7 @@ export default function DripLandingSequence({ frames, sequenceReady }) {
           {/* Section 9 – left copy */}
           <section className="min-h-screen w-full flex items-center px-6 lg:px-24">
             <div className="mx-auto flex w-full max-w-6xl items-center justify-between">
-              <div className="drip-parallax-left max-w-md space-y-5">
+              <div className="DRIP-parallax-left max-w-md space-y-5">
                 <h2 className="text-4xl md:text-5xl lg:text-[3rem] font-semibold tracking-tight text-gray-900 leading-tight">
                   Disinfection rate
                 </h2>
@@ -400,7 +400,7 @@ export default function DripLandingSequence({ frames, sequenceReady }) {
 
           {/* Section 10 + CTA — tall section + sticky copy so “Ready to experience” stays visible (no parallax fade-out) */}
           <section className="min-h-[200vh] w-full flex items-start justify-center px-6 pt-[12vh] lg:px-24 lg:pt-[14vh]">
-            <div className="drip-sticky-ready sticky top-[min(20vh,9rem)] z-10 mx-auto w-full max-w-md space-y-9 text-center">
+            <div className="DRIP-sticky-ready sticky top-[min(20vh,9rem)] z-10 mx-auto w-full max-w-md space-y-9 text-center">
               <h2 className="text-5xl md:text-6xl lg:text-[3.4rem] font-semibold tracking-tight text-gray-900 leading-tight">
                 Ready to<br />experience it?
               </h2>
@@ -416,72 +416,72 @@ export default function DripLandingSequence({ frames, sequenceReady }) {
 
         {/* Phone (≤1081px): same story beats as desktop, center-aligned, above the canvas; scroll height matches frame mapping */}
         <div className="min-[1082px]:hidden relative z-20">
-          <section className="drip-mobile-section flex w-full items-center justify-center px-5" style={{ minHeight: `${firstTenMobileSectionVh}vh` }}>
-            <div className="drip-mobile-section-inner mx-auto max-w-md space-y-4 text-center">
+          <section className="DRIP-mobile-section flex w-full items-center justify-center px-5" style={{ minHeight: `${firstTenMobileSectionVh}vh` }}>
+            <div className="DRIP-mobile-section-inner mx-auto max-w-md space-y-4 text-center">
               <h1 className="text-4xl font-semibold tracking-tight text-gray-900 leading-tight">A better</h1>
               <h2 className="text-3xl font-semibold tracking-tight text-[#7FAF73] leading-tight">everyday tumbler</h2>
               <p className="text-base text-gray-700 leading-relaxed">Built to disappear into your routine, not your cupboard.</p>
             </div>
           </section>
-          <section className="drip-mobile-section flex w-full items-center justify-center px-5" style={{ minHeight: `${firstTenMobileSectionVh}vh` }}>
-            <div className="drip-mobile-section-inner mx-auto max-w-md space-y-4 text-center">
+          <section className="DRIP-mobile-section flex w-full items-center justify-center px-5" style={{ minHeight: `${firstTenMobileSectionVh}vh` }}>
+            <div className="DRIP-mobile-section-inner mx-auto max-w-md space-y-4 text-center">
               <h2 className="text-3xl font-semibold tracking-tight text-gray-900 leading-tight">Designed for everyday carry</h2>
               <p className="text-base text-gray-700 leading-relaxed">Lightweight yet durable stainless steel construction for work, travel and daily use.</p>
             </div>
           </section>
-          <section className="drip-mobile-section flex w-full items-center justify-center px-5" style={{ minHeight: `${firstTenMobileSectionVh}vh` }}>
-            <div className="drip-mobile-section-inner mx-auto max-w-md space-y-3 text-center">
+          <section className="DRIP-mobile-section flex w-full items-center justify-center px-5" style={{ minHeight: `${firstTenMobileSectionVh}vh` }}>
+            <div className="DRIP-mobile-section-inner mx-auto max-w-md space-y-3 text-center">
               <h1 className="text-4xl font-semibold tracking-tight text-gray-900 leading-tight">Sleek</h1>
               <h2 className="text-3xl font-semibold tracking-tight text-[#7FAF73] leading-tight">design</h2>
               <p className="text-base text-gray-700 leading-relaxed">Clean stainless steel, soft curves, and a handle that feels natural in your hand.</p>
             </div>
           </section>
-          <section className="drip-mobile-section flex w-full items-center justify-center px-5" style={{ minHeight: `${firstTenMobileSectionVh}vh` }}>
-            <div className="drip-mobile-section-inner mx-auto max-w-md text-center">
+          <section className="DRIP-mobile-section flex w-full items-center justify-center px-5" style={{ minHeight: `${firstTenMobileSectionVh}vh` }}>
+            <div className="DRIP-mobile-section-inner mx-auto max-w-md text-center">
               <p className="text-base text-gray-700 leading-relaxed">A thoughtfully designed lid handle keeps your grip secure and comfortable, from commute to weekend.</p>
             </div>
           </section>
-          <section className="drip-mobile-section flex w-full items-center justify-center px-5" style={{ minHeight: `${firstTenMobileSectionVh}vh` }}>
-            <div className="drip-mobile-section-inner mx-auto max-w-md space-y-3 text-center">
+          <section className="DRIP-mobile-section flex w-full items-center justify-center px-5" style={{ minHeight: `${firstTenMobileSectionVh}vh` }}>
+            <div className="DRIP-mobile-section-inner mx-auto max-w-md space-y-3 text-center">
               <h1 className="text-4xl font-semibold tracking-tight text-gray-900 leading-tight">Flip-top</h1>
               <h2 className="text-3xl font-semibold tracking-tight text-[#7FAF73] leading-tight">drinking lid</h2>
               <h2 className="text-2xl font-semibold tracking-tight text-gray-900 leading-tight">One-flip easy sip</h2>
             </div>
           </section>
-          <section className="drip-mobile-section flex w-full items-center justify-center px-5" style={{ minHeight: `${firstTenMobileSectionVh}vh` }}>
-            <div className="drip-mobile-section-inner mx-auto max-w-md space-y-3 text-center">
+          <section className="DRIP-mobile-section flex w-full items-center justify-center px-5" style={{ minHeight: `${firstTenMobileSectionVh}vh` }}>
+            <div className="DRIP-mobile-section-inner mx-auto max-w-md space-y-3 text-center">
               <h1 className="text-4xl font-semibold tracking-tight text-gray-900 leading-tight">Direct</h1>
               <h2 className="text-3xl font-semibold tracking-tight text-[#7FAF73] leading-tight">drink</h2>
               <p className="text-base text-gray-700 leading-relaxed">A simple lid, tuned for smooth, direct sipping every time.</p>
             </div>
           </section>
-          <section className="drip-mobile-section flex w-full items-center justify-center px-5" style={{ minHeight: `${firstTenMobileSectionVh}vh` }}>
-            <div className="drip-mobile-section-inner mx-auto max-w-md space-y-3 text-center">
+          <section className="DRIP-mobile-section flex w-full items-center justify-center px-5" style={{ minHeight: `${firstTenMobileSectionVh}vh` }}>
+            <div className="DRIP-mobile-section-inner mx-auto max-w-md space-y-3 text-center">
               <h1 className="text-4xl font-semibold tracking-tight text-gray-900 leading-tight">Built-in straw</h1>
               <h2 className="text-2xl font-semibold tracking-tight text-[#7FAF73] leading-tight">Food-grade silicone designed for daily use.</h2>
             </div>
           </section>
-          <section className="drip-mobile-section flex w-full items-center justify-center px-5" style={{ minHeight: `${firstTenMobileSectionVh}vh` }}>
-            <div className="drip-mobile-section-inner mx-auto max-w-md space-y-3 text-center">
+          <section className="DRIP-mobile-section flex w-full items-center justify-center px-5" style={{ minHeight: `${firstTenMobileSectionVh}vh` }}>
+            <div className="DRIP-mobile-section-inner mx-auto max-w-md space-y-3 text-center">
               <h1 className="text-4xl font-semibold tracking-tight text-gray-900 leading-tight">Total capacity</h1>
               <h2 className="text-5xl font-semibold tracking-tight text-[#7FAF73] leading-tight">1 L</h2>
             </div>
           </section>
-          <section className="drip-mobile-section flex w-full items-center justify-center px-5" style={{ minHeight: `${firstTenMobileSectionVh}vh` }}>
-            <div className="drip-mobile-section-inner mx-auto max-w-md space-y-3 text-center">
+          <section className="DRIP-mobile-section flex w-full items-center justify-center px-5" style={{ minHeight: `${firstTenMobileSectionVh}vh` }}>
+            <div className="DRIP-mobile-section-inner mx-auto max-w-md space-y-3 text-center">
               <h2 className="text-3xl font-semibold tracking-tight text-gray-900 leading-tight">Stable grip base</h2>
               <p className="text-base text-gray-700 leading-relaxed">A rubber-padded base keeps the tumbler stable on any surface while softening noise and preventing scratches.</p>
             </div>
           </section>
-          <section className="drip-mobile-section flex w-full items-center justify-center px-5" style={{ minHeight: `${firstTenMobileSectionVh}vh` }}>
-            <div className="drip-mobile-section-inner mx-auto max-w-md space-y-3 text-center">
+          <section className="DRIP-mobile-section flex w-full items-center justify-center px-5" style={{ minHeight: `${firstTenMobileSectionVh}vh` }}>
+            <div className="DRIP-mobile-section-inner mx-auto max-w-md space-y-3 text-center">
               <h2 className="text-3xl font-semibold tracking-tight text-gray-900 leading-tight">Disinfection rate</h2>
               <h1 className="text-6xl font-semibold tracking-tight text-[#7FAF73] leading-tight">99%</h1>
             </div>
           </section>
           {/* Final beat: no scrub on inner. Sticky top matches nav (72px) so CTA never rides above the bar; taller section = longer pin before scroll-out. */}
           <section
-            className="drip-mobile-section drip-mobile-section--final flex w-full items-start justify-center px-5"
+            className="DRIP-mobile-section DRIP-mobile-section--final flex w-full items-start justify-center px-5"
             style={{ minHeight: `${lastMobileSectionVh}vh` }}
           >
             <div className="sticky top-[72px] z-20 mx-auto w-full max-w-md space-y-6 px-2 py-2 text-center">
@@ -503,7 +503,7 @@ export default function DripLandingSequence({ frames, sequenceReady }) {
       </div>
 
       {/* Fixed canvas — always visible, stays on last frame once animation completes */}
-      <div className="drip-canvas-container">
+      <div className="DRIP-canvas-container">
         <canvas ref={canvasRef} className="w-full h-full" />
       </div>
 
@@ -587,7 +587,7 @@ export default function DripLandingSequence({ frames, sequenceReady }) {
         </div>
       </div>
 
-      <button type="button" className="drip-scroll-to-bottom" onClick={scrollToBottom} aria-label="Scroll to bottom">
+      <button type="button" className="DRIP-scroll-to-bottom" onClick={scrollToBottom} aria-label="Scroll to bottom">
         <img src={`${ASSETS}/scroll-bottom.svg`} alt="" />
       </button>
 

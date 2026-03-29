@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function DripPreloader({ percent, visible, onVideoEnd }) {
+export default function DRIPPreloader({ percent, visible, onVideoEnd }) {
   return (
     <div
       id="preloader-container"

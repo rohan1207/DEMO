@@ -42,7 +42,7 @@ export default function AuthPage() {
         <p className="mt-2 text-slate-600">
           {mode === 'login'
             ? 'Sign in to view orders, wishlist, and your account details.'
-            : 'Join Drip for a premium shopping experience.'}
+            : 'Join DRIP for a premium shopping experience.'}
         </p>
 
         <form className="mt-8 space-y-4" onSubmit={onSubmit}>
