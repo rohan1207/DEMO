@@ -72,26 +72,13 @@ export default function DRIPLandingSequence({ frames, sequenceReady }) {
 
     const maxFrame = frames.length - 1;
 
-    /** If target frame not loaded yet (slow network), show nearest loaded frame so scroll never “dies” mid-sequence. */
-    function resolveLoadedImage(requestedIndex) {
-      const r = Math.max(0, Math.min(Math.round(requestedIndex), maxFrame));
-      if (frames[r]) return frames[r];
-      for (let j = r - 1; j >= 0; j -= 1) {
-        if (frames[j]) return frames[j];
-      }
-      for (let j = r + 1; j <= maxFrame; j += 1) {
-        if (frames[j]) return frames[j];
-      }
-      return null;
-    }
-
-    function drawFrame(requestedIndex) {
-      const img = resolveLoadedImage(requestedIndex);
-      if (!ctx) return;
+    function drawFrame(index) {
+      const i = Math.max(0, Math.min(index, maxFrame));
+      const img = frames[i];
+      if (!img || !ctx) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      if (!img) return;
 
       if (mobile) {
         // Phone: contain (never crop) — full frame visible, anchored to bottom of canvas buffer.
