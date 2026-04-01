@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -25,6 +25,8 @@ export default function DRIPLandingSequence({ frames, sequenceReady }) {
   const sequenceBlockRef = useRef(null);
   const canvasRef = useRef(null);
   const ctaRef = useRef(null);
+  const mobileFinalReadyRef = useRef(null);
+  const [mobileReadyPinned, setMobileReadyPinned] = useState(false);
   // Lerp state — target is set by ScrollTrigger, current is advanced each rAF tick
   const targetFrameRef = useRef(0);
   const currentFrameRef = useRef(0);
@@ -197,6 +199,35 @@ export default function DRIPLandingSequence({ frames, sequenceReady }) {
       if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
     };
   }, [frames]);
+
+  useEffect(() => {
+    if (mobileReadyPinned) return;
+    const isPhone = window.innerWidth <= 768;
+    if (!isPhone) return;
+
+    const scroller = document.querySelector('.main-content');
+    const target = mobileFinalReadyRef.current;
+    if (!target) return;
+
+    const checkAndPin = () => {
+      const rect = target.getBoundingClientRect();
+      // 60% from bottom == 40% from top viewport
+      const pinThresholdFromTop = window.innerHeight * 0.4;
+      if (rect.top <= pinThresholdFromTop) {
+        setMobileReadyPinned(true);
+      }
+    };
+
+    checkAndPin();
+    const el = scroller || window;
+    el.addEventListener('scroll', checkAndPin, { passive: true });
+    window.addEventListener('resize', checkAndPin);
+
+    return () => {
+      el.removeEventListener('scroll', checkAndPin);
+      window.removeEventListener('resize', checkAndPin);
+    };
+  }, [mobileReadyPinned]);
 
   const scrollToBottom = () => {
     const main = document.querySelector('.main-content');
@@ -481,10 +512,12 @@ export default function DRIPLandingSequence({ frames, sequenceReady }) {
           </section>
           {/* Final beat: no scrub on inner. Sticky top matches nav (72px) so CTA never rides above the bar; taller section = longer pin before scroll-out. */}
           <section
+            ref={mobileFinalReadyRef}
             className="DRIP-mobile-section DRIP-mobile-section--final flex w-full items-start justify-center px-5"
             style={{ minHeight: `${lastMobileSectionVh}vh` }}
           >
-            <div className="sticky top-[72px] z-20 mx-auto w-full max-w-md space-y-6 px-2 py-2 text-center">
+            {!mobileReadyPinned && (
+              <div className="sticky top-[72px] z-20 mx-auto w-full max-w-md space-y-6 px-2 py-2 text-center">
               <h2 className="text-3xl font-semibold tracking-tight text-gray-900 leading-tight">Ready to experience it?</h2>
               <Link
                 to="/shop"
@@ -492,7 +525,8 @@ export default function DRIPLandingSequence({ frames, sequenceReady }) {
               >
                 Buy now
               </Link>
-            </div>
+              </div>
+            )}
           </section>
         </div>
       </div>
@@ -502,6 +536,20 @@ export default function DRIPLandingSequence({ frames, sequenceReady }) {
       <div className="h-screen w-full bg-transparent" aria-hidden="true" />
       </div>
 
+      {mobileReadyPinned && (
+        <div className="fixed left-1/2 top-[40vh] z-[70] w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 px-2 text-center min-[769px]:hidden">
+          <div className="space-y-4 rounded-2xl bg-white/70 p-3 backdrop-blur-[1px]">
+            <h2 className="text-3xl font-semibold tracking-tight text-gray-900 leading-tight">Ready to experience it?</h2>
+            <Link
+              to="/shop"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-[#7FAF73] px-8 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-white"
+            >
+              Buy now
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Fixed canvas — always visible, stays on last frame once animation completes */}
       <div className="DRIP-canvas-container">
         <canvas ref={canvasRef} className="w-full h-full" />
@@ -510,7 +558,7 @@ export default function DRIPLandingSequence({ frames, sequenceReady }) {
       {/* Product CTAs — z above canvas + scroll copy; on phone sits lower and can overlap tumblers */}
       <div
         ref={ctaRef}
-        className="fixed left-0 z-[60] w-screen pointer-events-none max-[1081px]:bottom-[30%] max-[1081px]:top-auto max-[1081px]:h-auto min-[1082px]:top-[100px] min-[1082px]:h-[calc(100vh-100px)]"
+        className="fixed left-0 z-[60] w-screen pointer-events-none max-[1081px]:bottom-[30%] max-[1081px]:top-auto max-[1081px]:h-auto max-[768px]:bottom-[46%] min-[1082px]:top-[100px] min-[1082px]:h-[calc(100vh-100px)]"
         style={{
           opacity: 0,
           transition: 'none',

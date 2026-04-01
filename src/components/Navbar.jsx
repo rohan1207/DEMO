@@ -29,7 +29,7 @@ export default function Navbar({ onCartClick }) {
   const navLinks = [
     { to: '/home',        label: 'Home'    },
     { to: '/shop',    label: 'Shop'    },
-    { to: '/wishlist', label: 'Wishlist' },
+    { to: '/contact', label: 'Contact Us' },
     { to: '/about', label: 'About Us' },
   ];
 
@@ -72,25 +72,41 @@ export default function Navbar({ onCartClick }) {
           {/* ── Right: icons + burger ── */}
           <div className="flex items-center gap-1 ml-auto relative z-20">
             <Link
-              to="/contact"
-              className="hidden lg:inline-flex items-center justify-center rounded-full border border-slate-200/70 px-3 h-8 text-[11px] font-medium tracking-[0.16em] uppercase text-slate-800 hover:bg-slate-100/80 transition-colors"
+              to="/wishlist"
+              aria-label="Wishlist"
+              className="hidden lg:inline-flex items-center justify-center rounded-full border border-slate-200/70 h-8 w-8 text-slate-800 hover:bg-slate-100/80 transition-colors"
             >
-              Contact Us
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 20.25c-4.7-2.9-7.5-5.64-7.5-9a4.5 4.5 0 018.1-2.74A4.5 4.5 0 0119.5 11.25c0 3.36-2.8 6.1-7.5 9z" />
+              </svg>
             </Link>
             <Link
               to="/account"
-              className="hidden lg:inline-flex items-center justify-center rounded-full border border-slate-200/70 px-3 h-8 text-[11px] font-medium tracking-[0.16em] uppercase text-slate-800 hover:bg-slate-100/80 transition-colors"
+              aria-label={user ? 'Account' : 'Login'}
+              className="hidden lg:inline-flex items-center justify-center rounded-full border border-slate-200/70 h-8 w-8 text-slate-800 hover:bg-slate-100/80 transition-colors"
             >
-              {user ? 'Account' : 'Login'}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 7.5a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5a7.5 7.5 0 0115 0" />
+              </svg>
             </Link>
             {/* Minimal icons + CTA */}
             <button
               type="button"
               onClick={onCartClick}
               aria-label="Cart"
-              className="hidden lg:inline-flex items-center justify-center rounded-full border border-slate-200/70 px-3 h-8 text-[11px] font-medium tracking-[0.16em] uppercase text-slate-800 hover:bg-slate-100/80 transition-colors"
+              className="hidden lg:inline-flex relative items-center justify-center rounded-full border border-slate-200/70 h-8 w-8 text-slate-800 hover:bg-slate-100/80 transition-colors"
             >
-              Cart ({cartCount})
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h2l2.4 10.2a2 2 0 001.95 1.54h8.9a2 2 0 001.95-1.54L22 7H7.2" />
+                <circle cx="10" cy="19" r="1.5" />
+                <circle cx="18" cy="19" r="1.5" />
+              </svg>
+              {cartCount > 0 && (
+                <span className="absolute -right-1 -top-1 min-w-[1rem] rounded-full bg-[#7FAF73] px-1 text-center text-[9px] font-semibold leading-[1rem] text-white">
+                  {cartCount > 9 ? '9+' : cartCount}
+                </span>
+              )}
             </button>
             <Link
               to="/shop"
@@ -98,6 +114,25 @@ export default function Navbar({ onCartClick }) {
             >
               Buy Now
             </Link>
+
+            {/* Mobile cart icon — left of hamburger */}
+            <button
+              type="button"
+              onClick={onCartClick}
+              aria-label="Open cart"
+              className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-300/80 text-slate-800 transition-colors hover:bg-slate-100 lg:hidden"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h2l2.4 10.2a2 2 0 001.95 1.54h8.9a2 2 0 001.95-1.54L22 7H7.2" />
+                <circle cx="10" cy="19" r="1.5" />
+                <circle cx="18" cy="19" r="1.5" />
+              </svg>
+              {cartCount > 0 && (
+                <span className="absolute -right-1 -top-1 min-w-[1.1rem] rounded-full bg-[#7FAF73] px-1 text-center text-[10px] font-semibold leading-[1.1rem] text-white">
+                  {cartCount > 9 ? '9+' : cartCount}
+                </span>
+              )}
+            </button>
 
             {/* Hamburger — mobile only */}
             <button
@@ -148,18 +183,52 @@ export default function Navbar({ onCartClick }) {
             </Link>
           ))}
           <Link
+            to="/wishlist"
+            onClick={closeMenu}
+            aria-label="Wishlist"
+            className="text-black/80 hover:text-black py-3 border-b border-slate-200 transition-colors inline-flex items-center"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-6 w-6" aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 20.25c-4.7-2.9-7.5-5.64-7.5-9a4.5 4.5 0 018.1-2.74A4.5 4.5 0 0119.5 11.25c0 3.36-2.8 6.1-7.5 9z" />
+            </svg>
+          </Link>
+          <Link
+            to="/account"
+            onClick={closeMenu}
+            aria-label={user ? 'Account' : 'Login'}
+            className="text-black/80 hover:text-black py-3 border-b border-slate-200 transition-colors inline-flex items-center"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-6 w-6" aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 7.5a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5a7.5 7.5 0 0115 0" />
+            </svg>
+          </Link>
+          <button
+            type="button"
+            onClick={() => {
+              onCartClick?.();
+              closeMenu();
+            }}
+            aria-label="Cart"
+            className="text-black/80 hover:text-black py-3 border-b border-slate-200 transition-colors inline-flex items-center"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-6 w-6" aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h2l2.4 10.2a2 2 0 001.95 1.54h8.9a2 2 0 001.95-1.54L22 7H7.2" />
+              <circle cx="10" cy="19" r="1.5" />
+              <circle cx="18" cy="19" r="1.5" />
+            </svg>
+            {cartCount > 0 && (
+              <span className="ml-2 rounded-full bg-[#7FAF73] px-2 py-0.5 text-[11px] font-semibold text-white">
+                {cartCount > 9 ? '9+' : cartCount}
+              </span>
+            )}
+          </button>
+          <Link
             to="/contact"
             onClick={closeMenu}
             className="text-black/80 hover:text-black text-xl font-medium uppercase py-3 border-b border-slate-200 transition-colors"
           >
             Contact Us
-          </Link>
-          <Link
-            to="/account"
-            onClick={closeMenu}
-            className="text-black/80 hover:text-black text-xl font-medium uppercase py-3 border-b border-slate-200 transition-colors"
-          >
-            {user ? 'Account' : 'Login'}
           </Link>
         </nav>
 

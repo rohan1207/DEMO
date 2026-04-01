@@ -44,12 +44,12 @@ export default function DripMiniCart({ open, onClose }) {
         </div>
 
         {!cart.length ? (
-          <div className="flex flex-1 flex-col justify-center px-4 py-8 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-6">
-            <p className="text-center text-base text-slate-600 sm:text-left">Your cart is empty.</p>
+          <div className="flex flex-1 flex-col justify-center px-4 py-8 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-6 lg:items-center">
+            <p className="text-center text-base text-slate-600 sm:text-left lg:text-center">Your cart is empty.</p>
             <Link
               to="/shop"
               onClick={onClose}
-              className="mt-5 inline-flex min-h-[48px] w-full items-center justify-center rounded-full bg-[#7FAF73] px-6 py-3 text-center text-xs font-semibold uppercase tracking-[0.16em] text-white sm:w-auto sm:self-start sm:tracking-[0.18em]"
+              className="mt-5 inline-flex min-h-[48px] w-full items-center justify-center rounded-full bg-[#7FAF73] px-6 py-3 text-center text-xs font-semibold uppercase tracking-[0.16em] text-white sm:w-auto sm:self-start sm:tracking-[0.18em] lg:self-center"
             >
               Continue shopping
             </Link>

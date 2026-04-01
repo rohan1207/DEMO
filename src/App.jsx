@@ -85,16 +85,16 @@ function AppContent() {
     phoneAllowedRoutes.some((route) => location.pathname.startsWith(route)) ||
     location.pathname.startsWith('/product/');
 
-  if (isPhoneScreen && !allowPhoneAccess) {
-    return (
-      <div className="phone-block-screen">
-        <div className="phone-block-content">
-          <h1>Please open on desktop.</h1>
-          <p>Phone coming very soon.</p>
-        </div>
-      </div>
-    );
-  }
+  // if (isPhoneScreen && !allowPhoneAccess) {
+  //   return (
+  //     <div className="phone-block-screen">
+  //       <div className="phone-block-content">
+  //         <h1>Please open on desktop.</h1>
+  //         <p>Phone coming very soon.</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <StoreProvider>

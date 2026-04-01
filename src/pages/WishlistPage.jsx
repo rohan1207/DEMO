@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { FaHeart, FaStar } from 'react-icons/fa';
 import { useStore } from '../context/StoreContext';
 
 const money = (v) => `₹${(v || 0).toLocaleString('en-IN')}`;
@@ -54,47 +55,71 @@ export default function WishlistPage() {
           </Link>
         </div>
       ) : (
-        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">
+        <div className="mx-auto mt-8 grid w-full max-w-5xl grid-cols-1 gap-8 sm:mt-10 sm:gap-10 md:grid-cols-2 md:gap-10 lg:gap-12">
           {items.map((product) => (
             <article
               key={product.id}
-              className="flex flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_2px_24px_-12px_rgba(15,23,42,0.08)] sm:rounded-3xl"
+              className="group flex flex-col overflow-hidden rounded-2xl border border-black/8 bg-white shadow-[0_2px_40px_-12px_rgba(15,23,42,0.08)] transition-shadow duration-300 sm:rounded-3xl hover:shadow-[0_20px_60px_-24px_rgba(15,23,42,0.12)]"
             >
-              <Link
-                to={`/product/${product.slug}`}
-                className="group block bg-gradient-to-b from-[#FAFCF9] to-white px-4 pb-2 pt-6 sm:px-5 sm:pt-8"
-              >
-                <img
-                  src={product.heroImage || product.images?.[0]}
-                  alt={product.name}
-                  className="mx-auto h-44 w-full object-contain transition-transform duration-300 group-hover:scale-[1.03] sm:h-52 md:h-56"
-                />
-              </Link>
-              <div className="flex flex-1 flex-col p-4 sm:p-5">
-                <h2 className="line-clamp-2 text-base font-semibold leading-snug text-slate-900 sm:text-lg">
+              <div className="relative">
+                <Link
+                  to={`/product/${product.slug}`}
+                  className="block overflow-hidden bg-gradient-to-b from-[#FAFCF9] to-white px-4 pb-2 pt-8 sm:px-6 sm:pt-9 md:px-8 md:pt-10"
+                >
+                  <span className="absolute left-4 top-4 rounded-full bg-[#7FAF73]/12 px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-[#4f8248] sm:left-6 sm:top-6 sm:px-3 sm:py-1 sm:text-[10px] sm:tracking-[0.16em]">
+                    {product.shortName || 'DRIP'}
+                  </span>
+                  <img
+                    src={product.heroImage || product.images?.[0]}
+                    alt={product.name}
+                    className="mx-auto h-[220px] w-full object-contain transition-transform duration-500 ease-out group-hover:scale-[1.04] sm:h-[260px] md:h-[300px] lg:h-[320px]"
+                  />
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => toggleWishlist(product.id)}
+                  className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-white/90 text-[#7FAF73] shadow-sm backdrop-blur transition hover:bg-white sm:right-4 sm:top-4 sm:h-10 sm:w-10"
+                  aria-label="Remove from wishlist"
+                >
+                  <FaHeart className="h-[18px] w-[18px]" aria-hidden />
+                </button>
+              </div>
+
+              <div className="flex flex-1 flex-col px-4 pb-5 pt-2 sm:px-6 sm:pb-6">
+                <h2 className="line-clamp-2 text-base font-semibold leading-snug text-black sm:text-lg md:text-xl">
                   {product.name}
                 </h2>
+                <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 sm:mt-2">
+                  <div className="flex shrink-0 text-[#7FAF73]">
+                    {[...Array(5)].map((_, i) => (
+                      <FaStar key={i} className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                    ))}
+                  </div>
+                  <span className="text-xs text-black/50 sm:text-sm">
+                    {product.rating?.toFixed(1)} · {product.reviewCount ?? 0} reviews
+                  </span>
+                </div>
                 {product.price != null && (
-                  <p className="mt-2 text-lg font-semibold text-slate-900 sm:text-xl">
+                  <p className="mt-4 text-lg font-semibold text-black sm:text-xl">
                     {money(product.price)}
                     {product.compareAtPrice ? (
-                      <span className="ml-2 text-sm font-normal text-slate-400 line-through">
+                      <span className="ml-2 text-sm font-normal text-black/40 line-through">
                         {money(product.compareAtPrice)}
                       </span>
                     ) : null}
                   </p>
                 )}
-                <div className="mt-4 flex flex-col gap-2 sm:mt-auto sm:flex-row sm:flex-wrap sm:gap-2">
+                <div className="mt-5 flex flex-col gap-2 border-t border-black/6 pt-5 sm:mt-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:gap-2 sm:pt-6">
                   <Link
                     to={`/product/${product.slug}`}
-                    className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-full bg-[#7FAF73] px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-white sm:min-h-0 sm:flex-none sm:px-5 sm:text-xs sm:tracking-[0.18em]"
+                    className="inline-flex min-h-[40px] flex-1 items-center justify-center rounded-full border border-black/15 px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-black/80 transition-colors hover:bg-black/[0.03] sm:min-h-0 sm:flex-none sm:px-5 sm:py-2.5 sm:text-[10px] sm:tracking-[0.16em]"
                   >
-                    View product
+                    Details
                   </Link>
                   <button
                     type="button"
                     onClick={() => toggleWishlist(product.id)}
-                    className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-full border border-slate-300 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-700 transition-colors hover:bg-slate-50 sm:min-h-0 sm:flex-none sm:px-5 sm:text-xs sm:tracking-[0.18em]"
+                    className="inline-flex min-h-[40px] flex-1 items-center justify-center rounded-full border border-[#7FAF73]/40 bg-white px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-[#4f8248] transition-colors hover:bg-[#7FAF73]/10 sm:min-h-0 sm:flex-none sm:px-5 sm:py-2.5 sm:text-[10px] sm:tracking-[0.16em]"
                   >
                     Remove
                   </button>
