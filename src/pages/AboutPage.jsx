@@ -14,6 +14,48 @@ import { FaStar, FaHeart } from "react-icons/fa";
 
 gsap.registerPlugin(ScrollTrigger);
 
+/** Compact founder narrative — rendered as one card (see Founder’s story section). */
+const FOUNDER_STORY_PARTS = [
+  {
+    type: "scene",
+    lines: [
+      "One evening I came home and saw my sister struggling to choose a water bottle.",
+      "“Why are you overthinking something so simple?” I asked.",
+    ],
+  },
+  {
+    type: "quote",
+    text: "It’s not about the product. It’s about consistency and reliability.",
+    sub: "That line stayed with me.",
+  },
+  {
+    type: "body",
+    text: "When I looked closer, it wasn’t just bottles — most everyday things fail the same way: strong at first, then they quietly slip. You start shaping your routine around tools that should support it. That wasn’t okay with me.",
+  },
+  {
+    type: "callout",
+    title: "Athlete mindset",
+    body: "Consistency is everything. Progress is showing up every day with the right support — your tools should meet that same standard.",
+  },
+  {
+    type: "belief",
+    lead: "We built T-REX on one belief:",
+    emphasis: "Consistency in your tools builds consistency in your life.",
+  },
+  {
+    type: "body",
+    text: "I’ve been hands-on from R&D and design to supply chain and go-to-market — not to sell more, but to fix what’s broken. Building better.",
+  },
+  {
+    type: "pillRow",
+    items: ["Long-term performance", "No compromise on durability · function · reliability"],
+  },
+  {
+    type: "footer",
+    text: "T-REX isn’t one product — it’s uncompromising essentials you use daily, built to last without shortcuts or endless replacements.",
+  },
+];
+
 const METRICS = [
   {
     id: "units",
@@ -536,6 +578,175 @@ const AboutUs = () => {
           </div>
         </div>
       </motion.section>
+
+      {/* FOUNDER'S STORY — compact vertical on phone; wide card + 2-col grid on md+ */}
+      <section className="border-y border-black/5 bg-[#F5FAF4] px-4 py-10 sm:px-6 sm:py-12">
+        <div className="mx-auto max-w-xl md:max-w-4xl lg:max-w-5xl">
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            className="rounded-2xl border border-black/[0.08] bg-white p-5 shadow-[0_8px_30px_rgba(0,0,0,0.06)] sm:p-7 md:p-8 lg:p-9"
+          >
+            <div className="text-center md:text-left">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#7FAF73] sm:text-[11px] sm:tracking-[0.2em]">
+                From the founder
+              </p>
+              <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl md:text-[1.65rem] lg:text-3xl">
+                Founder&apos;s story
+              </h2>
+            </div>
+
+            <div className="mt-5 grid grid-cols-1 gap-4 sm:mt-6 md:grid-cols-2 md:gap-x-10 md:gap-y-5 lg:gap-x-12">
+              {FOUNDER_STORY_PARTS.map((part, idx) => {
+                if (part.type === "scene") {
+                  return (
+                    <div
+                      key={idx}
+                      className="min-w-0 space-y-1.5 text-[13px] leading-snug text-slate-600 sm:text-sm md:self-start"
+                    >
+                      {part.lines.map((line, i) => (
+                        <p key={i}>{line}</p>
+                      ))}
+                    </div>
+                  );
+                }
+                if (part.type === "quote") {
+                  return (
+                    <div
+                      key={idx}
+                      className="min-w-0 rounded-xl border-l-[3px] border-[#7FAF73] bg-[#7FAF73]/[0.09] px-3.5 py-3 sm:px-4 md:self-start"
+                    >
+                      <p className="text-[13px] font-medium leading-snug text-slate-800 sm:text-sm">
+                        &ldquo;{part.text}&rdquo;
+                      </p>
+                      {part.sub && (
+                        <p className="mt-2 text-[12px] text-slate-600 sm:text-[13px]">{part.sub}</p>
+                      )}
+                    </div>
+                  );
+                }
+                if (part.type === "body") {
+                  const isSecondBody = idx === 5;
+                  return (
+                    <p
+                      key={idx}
+                      className={`min-w-0 text-[13px] leading-relaxed text-slate-700 sm:text-sm sm:leading-relaxed ${isSecondBody ? "md:col-span-2" : ""}`}
+                    >
+                      {part.text}
+                    </p>
+                  );
+                }
+                if (part.type === "callout") {
+                  return (
+                    <div
+                      key={idx}
+                      className="min-w-0 rounded-xl bg-slate-50/90 px-3.5 py-3 ring-1 ring-black/[0.05] sm:px-4 md:self-start"
+                    >
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#5a8f52]">
+                        {part.title}
+                      </p>
+                      <p className="mt-1.5 text-[13px] leading-snug text-slate-700 sm:text-sm">
+                        {part.body}
+                      </p>
+                    </div>
+                  );
+                }
+                if (part.type === "belief") {
+                  return (
+                    <div
+                      key={idx}
+                      className="min-w-0 rounded-xl bg-[#7FAF73]/[0.07] px-3.5 py-3 text-center sm:px-4 md:col-span-2 md:py-3.5"
+                    >
+                      <p className="text-[12px] text-slate-600 sm:text-[13px]">{part.lead}</p>
+                      <p className="mt-1 text-[13px] font-semibold leading-snug text-[#3d6b38] sm:text-sm md:text-base">
+                        {part.emphasis}
+                      </p>
+                    </div>
+                  );
+                }
+                if (part.type === "pillRow") {
+                  return (
+                    <div key={idx} className="flex min-w-0 flex-wrap gap-2 md:col-span-2 md:justify-center lg:justify-start">
+                      {part.items.map((item, i) => (
+                        <span
+                          key={i}
+                          className="inline-flex max-w-full rounded-full border border-black/[0.06] bg-[#FFFCF9] px-3 py-1.5 text-[11px] leading-tight text-slate-700 sm:text-xs"
+                        >
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+                  );
+                }
+                if (part.type === "footer") {
+                  return (
+                    <p
+                      key={idx}
+                      className="min-w-0 border-t border-black/[0.06] pt-4 text-[12px] leading-relaxed text-slate-600 sm:text-[13px] md:col-span-2"
+                    >
+                      {part.text}
+                    </p>
+                  );
+                }
+                return null;
+              })}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* FOUNDER — ROHAN DESHMUKH */}
+      <section className="bg-[#F5FAF4] px-4 py-14 sm:px-6 sm:py-16 md:py-20">
+        <div className="mx-auto max-w-5xl">
+          <motion.div
+            className="overflow-hidden rounded-2xl border border-black/8 bg-white shadow-[0_2px_40px_-12px_rgba(15,23,42,0.08)] sm:rounded-3xl"
+            initial={{ opacity: 0, y: 28 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <div className="grid grid-cols-1 gap-8 p-6 sm:p-8 md:grid-cols-[minmax(0,220px)_1fr] md:gap-10 md:p-10 lg:grid-cols-[260px_1fr] lg:p-12">
+              <div className="flex flex-col items-center text-center md:items-start md:text-left">
+                <div
+                  className="flex h-28 w-28 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7FAF73] to-[#5a8f52] text-2xl font-semibold tracking-tight text-white shadow-inner sm:h-32 sm:w-32 sm:text-3xl"
+                  aria-hidden
+                >
+                  RD
+                </div>
+                <h3 className="mt-5 text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
+                  Rohan Deshmukh
+                </h3>
+                <p className="mt-1 text-sm font-medium uppercase tracking-[0.14em] text-[#4f8248] sm:text-[0.8125rem] sm:tracking-[0.16em]">
+                  Founder, T-REX
+                </p>
+              </div>
+              <div className="min-w-0 space-y-5 border-t border-black/6 pt-8 text-left md:border-t-0 md:border-l md:pl-10 md:pt-0">
+                <p className="text-[0.95rem] leading-[1.75] text-slate-700 sm:text-base sm:leading-relaxed">
+                  I started T-REX because I got tired of replacing things that should&apos;ve
+                  just… worked.
+                </p>
+                <p className="text-[0.95rem] leading-[1.75] text-slate-700 sm:text-base sm:leading-relaxed">
+                  Tumblers aren&apos;t exciting. They&apos;re not supposed to be. But
+                  that&apos;s exactly why they should be built right — something you grab
+                  without thinking, that keeps your coffee hot and your water cold, day after
+                  day, without failing you.
+                </p>
+                <p className="text-[0.95rem] leading-[1.75] text-slate-700 sm:text-base sm:leading-relaxed">
+                  I run the team, obsess over the details, and make sure every product we
+                  ship is something I&apos;d actually want to use myself. That&apos;s the
+                  bar.
+                </p>
+                <p className="text-[0.95rem] font-medium leading-[1.75] text-slate-900 sm:text-base sm:leading-relaxed">
+                  T-REX isn&apos;t about hype. It&apos;s about making one thing really well
+                  — and having it last.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
 
       {/* BRAND PRINCIPLES SECTION */}
       <div className="bg-white px-4 py-12 sm:px-6 sm:py-16 md:py-20">

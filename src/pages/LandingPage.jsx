@@ -1,9 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DRIPPreloader from '../components/drip/DripPreloader';
-import { useSequencePreload, LANDING_PRELOAD_TARGET } from '../hooks/useSequencePreload';
-
-const LANDING_NAV_TIMEOUT_MS = 25000;
+import { useSequencePreload } from '../hooks/useSequencePreload';
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -11,25 +9,22 @@ export default function LandingPage() {
   const navigatedRef = useRef(false);
 
   const onProgress = useCallback((p) => setPercent(p), []);
-  const { loaded, total } = useSequencePreload(onProgress, { landingProgress: true });
+  const { ready, error } = useSequencePreload(onProgress, { landingProgress: true });
 
   useEffect(() => {
     if (navigatedRef.current) return;
-    const need = total > 0 ? Math.max(1, Math.ceil(total * LANDING_PRELOAD_TARGET)) : 0;
-    if (need > 0 && loaded >= need) {
+    if (ready) {
       navigatedRef.current = true;
       navigate('/home', { replace: true });
     }
-  }, [loaded, total, navigate]);
+  }, [ready, navigate]);
 
+  // Fail-safe: if preload fails entirely, don't trap the user on splash forever.
   useEffect(() => {
-    const t = setTimeout(() => {
-      if (navigatedRef.current) return;
-      navigatedRef.current = true;
-      navigate('/home', { replace: true });
-    }, LANDING_NAV_TIMEOUT_MS);
-    return () => clearTimeout(t);
-  }, [navigate]);
+    if (!error || navigatedRef.current) return;
+    navigatedRef.current = true;
+    navigate('/home', { replace: true });
+  }, [error, navigate]);
 
   return (
     <div className="min-h-screen bg-white">

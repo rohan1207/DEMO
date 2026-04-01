@@ -209,10 +209,10 @@ export default function ProductDetailPage() {
         </div>
       )}
 
-      <div className="mt-20">
+      <div className="mt-20 w-full">
         <h2 className="text-2xl font-semibold tracking-tight text-slate-900">You may also like</h2>
         {alsoLike.length ? (
-          <div className="mt-6 grid justify-items-center gap-7 md:grid-cols-2">
+          <div className="mt-6 grid w-full grid-cols-1 justify-items-start gap-7 md:grid-cols-2 md:gap-8 lg:gap-10">
             {alsoLike.map((p) => {
               const inWishlist = wishlist.includes(p.id);
               return (

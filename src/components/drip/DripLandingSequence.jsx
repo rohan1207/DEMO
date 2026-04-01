@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useLayoutEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -32,9 +32,26 @@ export default function DRIPLandingSequence({ frames, sequenceReady }) {
   const currentFrameRef = useRef(0);
   const rafIdRef = useRef(null);
 
+  // Reload / client navigations: start at top so scroll-driven frame index matches the hero (frame 0).
+  useLayoutEffect(() => {
+    if (!sequenceReady) return;
+    if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    const main = document.querySelector('.main-content');
+    if (main) main.scrollTop = 0;
+    window.scrollTo(0, 0);
+    targetFrameRef.current = 0;
+    currentFrameRef.current = 0;
+    requestAnimationFrame(() => {
+      ScrollTrigger.refresh();
+    });
+  }, [sequenceReady]);
+
   useEffect(() => {
     if (!frames || frames.length === 0 || !sequenceBlockRef.current || !canvasRef.current) return;
 
+    const rootEl = sequenceBlockRef.current;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     const mobile = window.innerWidth <= SEQUENCE_MOBILE_BREAKPOINT_PX;
@@ -57,7 +74,7 @@ export default function DRIPLandingSequence({ frames, sequenceReady }) {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       if (mobile) {
-        // Phone: contain (full frame visible — no left/right crop). Bottom-aligned; top letterbox is white and blends with the page.
+        // Phone: contain (never crop) — full frame visible, anchored to bottom of canvas buffer.
         const iw = img.naturalWidth || 1;
         const ih = img.naturalHeight || 1;
         const cw = canvas.width;
@@ -117,8 +134,8 @@ export default function DRIPLandingSequence({ frames, sequenceReady }) {
     rafIdRef.current = requestAnimationFrame(renderLoop);
 
     // ScrollTrigger only updates the target frame — no drawing happens here
-    const trigger = ScrollTrigger.create({
-      trigger: sequenceBlockRef.current,
+    ScrollTrigger.create({
+      trigger: rootEl,
       scroller,
       start: 'top top',
       end: 'bottom top',
@@ -127,6 +144,9 @@ export default function DRIPLandingSequence({ frames, sequenceReady }) {
         targetFrameRef.current = Math.round(self.progress * maxFrame);
       },
     });
+    targetFrameRef.current = 0;
+    currentFrameRef.current = 0;
+    ScrollTrigger.refresh();
 
     // Premium horizontal parallax reveal for text blocks
     // scrub: 0.6 adds a small lag that smooths out fast/jerky scrolls
@@ -195,8 +215,13 @@ export default function DRIPLandingSequence({ frames, sequenceReady }) {
     drawFrame(0);
 
     return () => {
-      trigger.kill();
       if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+      ScrollTrigger.getAll().forEach((st) => {
+        const t = st.trigger;
+        if (t && rootEl && (rootEl === t || rootEl.contains(t))) {
+          st.kill();
+        }
+      });
     };
   }, [frames]);
 
@@ -236,8 +261,8 @@ export default function DRIPLandingSequence({ frames, sequenceReady }) {
   };
   if (!sequenceReady) {
     return (
-      <div className="DRIP-landing-sequence-container h-screen bg-black flex items-center justify-center">
-        <p className="text-black">Loading sequence…</p>
+      <div className="DRIP-landing-sequence-container flex h-screen min-h-[100dvh] items-center justify-center bg-white">
+        <p className="text-sm text-slate-500">Loading…</p>
       </div>
     );
   }
@@ -558,7 +583,7 @@ export default function DRIPLandingSequence({ frames, sequenceReady }) {
       {/* Product CTAs — z above canvas + scroll copy; on phone sits lower and can overlap tumblers */}
       <div
         ref={ctaRef}
-        className="fixed left-0 z-[60] w-screen pointer-events-none max-[1081px]:bottom-[30%] max-[1081px]:top-auto max-[1081px]:h-auto max-[768px]:bottom-[46%] min-[1082px]:top-[100px] min-[1082px]:h-[calc(100vh-100px)]"
+        className="fixed left-0 z-[60] w-screen pointer-events-none max-[1081px]:bottom-[26%] max-[1081px]:top-auto max-[1081px]:h-auto max-[768px]:bottom-[28%] min-[1082px]:top-[100px] min-[1082px]:h-[calc(100vh-100px)]"
         style={{
           opacity: 0,
           transition: 'none',
@@ -604,7 +629,7 @@ export default function DRIPLandingSequence({ frames, sequenceReady }) {
 
         {/* Phone: two columns, centered, nowrap buttons, sits above frames */}
         <div className="flex min-[1082px]:hidden w-full justify-center px-2">
-          <div className="flex w-full max-w-sm items-start justify-between gap-3 sm:gap-4 pointer-events-auto">
+          <div className="flex w-full max-w-lg items-start justify-between gap-[6.5rem] sm:gap-[7.5rem] pointer-events-auto">
             <Link to="/product/sage-green" className="flex min-w-0 flex-1 flex-col items-center gap-1.5 text-center">
               <div className="flex flex-wrap items-baseline justify-center gap-x-1.5 gap-y-0">
                 <span className="text-xs font-semibold text-gray-900 sm:text-sm">₹2,499</span>
@@ -641,8 +666,7 @@ export default function DRIPLandingSequence({ frames, sequenceReady }) {
 
       {(!frames || frames.length === 0) && (
         <p className="fixed bottom-20 left-1/2 -translate-x-1/2 text-black/70 text-xs z-10 max-w-md text-center">
-          Add sequence frames under public/assets/seq/ — phone uses desktop-webp/; wide screens use mobile-webp/. See
-          useSequencePreload.js.
+          Add sequence frames: wide → mobile-webp/ (785) · phone → desktop-webp/ (001–830). See useSequencePreload.js.
         </p>
       )}
     </div>

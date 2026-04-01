@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 const FRAME_STEP = 1; // load all frames; memory is manageable without ImageBitmap conversion
 
 const DESKTOP_TOTAL_FRAMES = 785;
-// Phone (≤1081px): 830 frames from desktop-webp/ (ezgif-frame-001.png … ezgif-frame-830.png)
+// Phone (≤1081px): desktop-webp folder, ezgif-frame-001 … ezgif-frame-830
 const MOBILE_START_FRAME = 1;
 const MOBILE_END_FRAME = 830;
 
@@ -15,27 +15,23 @@ const MOBILE_TOTAL_FRAMES = Math.ceil((MOBILE_END_FRAME - MOBILE_START_FRAME + 1
 /** Must match DripLandingSequence: wide vs narrow uses different asset folders (same 1081px breakpoint). */
 const SEQUENCE_MOBILE_BREAKPOINT_PX = 1081;
 
-// Landing splash: progress bar hits 100% when this fraction of frames are loaded; redirect then. Rest keep loading during /home scroll.
-const LANDING_PRELOAD_TARGET = 0.5;
+// Landing splash: 100% means all frames for the current screen size are loaded.
+const LANDING_PRELOAD_TARGET = 1;
 
-// Unlock sequence / allow entry when half the frames are in (or timeout with at least frame 0).
-const ENTRY_MAX_WAIT_MS = 12000;
-
-// Wide screens (>1081px): full sequence from mobile-webp folder (785 frames).
+// Wide screens (>1081px): mobile-webp/ — 785 frames (ezgif-frame-001 … 785).
 function framePathDesktop(loadIndex) {
-  const num = loadIndex * FRAME_STEP + 1; // 1, 3, 5 … 785
+  const num = loadIndex * FRAME_STEP + 1;
   return `/assets/seq/mobile-webp/ezgif-frame-${String(num).padStart(3, '0')}.png`;
 }
 
-// Phone / narrow screens (≤1081px): use desktop-webp folder only; frame range MOBILE_START–END.
+// Phone (≤1081px): desktop-webp/ — 830 frames (ezgif-frame-001 … 830).
 function framePathMobile(loadIndex) {
   const num = MOBILE_START_FRAME + loadIndex * FRAME_STEP;
   return `/assets/seq/desktop-webp/ezgif-frame-${String(num).padStart(3, '0')}.png`;
 }
 
-// Old mobile sequence length (before 830-frame phone export) — used only to scale scroll distance
+// Legacy baseline scroll height — scales phone scroll distance with frame count
 const LEGACY_MOBILE_FRAME_COUNT = 564;
-// Scroll spacer height (vh) for phone; proportional to frame count vs legacy 2000vh
 const MOBILE_SEQUENCE_SCROLL_VH = Math.round((2000 * MOBILE_TOTAL_FRAMES) / LEGACY_MOBILE_FRAME_COUNT);
 
 function loadImage(src) {
@@ -94,13 +90,14 @@ function entryReadyThreshold(total) {
   return Math.max(1, Math.ceil(total * LANDING_PRELOAD_TARGET));
 }
 
-function ensureEntryReady(manager, startedAt) {
+/**
+ * Home / canvas can show as soon as frame 0 is drawable.
+ * LandingPage navigation still uses `ready` (full sequence). Do not tie this to total frame count.
+ */
+function ensureEntryReady(manager) {
   if (manager.entryReady) return;
-  const threshold = entryReadyThreshold(manager.total);
   const hasFirstFrame = Boolean(manager.frames?.[0]);
-  const reachedMinFrames = manager.loaded >= threshold && hasFirstFrame;
-  const timedOut = Date.now() - startedAt >= ENTRY_MAX_WAIT_MS && hasFirstFrame;
-  if (reachedMinFrames || timedOut) {
+  if (hasFirstFrame && manager.loaded >= 1) {
     manager.entryReady = true;
   }
 }
@@ -111,7 +108,6 @@ function startManager(manager) {
 
   (async () => {
     const BATCH = 20;
-    const startedAt = Date.now();
     const results = new Array(manager.total).fill(null);
     manager.frames = results;
     notifyManager(manager);
@@ -121,7 +117,7 @@ function startManager(manager) {
       const firstFrame = await loadImage(manager.pathFn(0));
       results[0] = firstFrame;
       manager.loaded = firstFrame ? 1 : 0;
-      ensureEntryReady(manager, startedAt);
+      ensureEntryReady(manager);
       notifyManager(manager);
 
       for (let start = 1; start < manager.total; start += BATCH) {
@@ -133,7 +129,7 @@ function startManager(manager) {
               results[idx] = img;
               manager.loaded += 1;
             }
-            ensureEntryReady(manager, startedAt);
+            ensureEntryReady(manager);
           });
         });
         await Promise.all(batch);
@@ -147,7 +143,7 @@ function startManager(manager) {
 
       if (manager.loaded === 0) {
         manager.error = new Error(
-          'No sequence frames loaded. Wide: public/assets/seq/mobile-webp/ · Phone: public/assets/seq/desktop-webp/'
+          'No sequence frames loaded. Wide: public/assets/seq/mobile-webp/ (785) · Phone: public/assets/seq/desktop-webp/ (001–830).'
         );
       }
 
@@ -163,10 +159,10 @@ function startManager(manager) {
 
 /**
  * Progressive preload (singleton per layout: desktop vs phone — same paths as DripLandingSequence at 1081px).
- * - entryReady: ≥ LANDING_PRELOAD_TARGET of frames (or timeout with frame 0) so /home scroll can start smoothly
- * - ready: full sequence loaded (continues in background after landing redirect)
+ * - entryReady: first frame is drawable (show Home canvas + hero without waiting for the full sequence)
+ * - ready: full sequence loaded (LandingPage uses this before navigating to /home)
  *
- * @param {function(number): void} [onProgress] — 0–100; if options.landingProgress, 100% = LANDING_PRELOAD_TARGET of frames loaded
+ * @param {function(number): void} [onProgress] — 0–100; if options.landingProgress, denom = full frame count
  */
 export function useSequencePreload(onProgress, options = {}) {
   const landingProgress = options.landingProgress === true;
