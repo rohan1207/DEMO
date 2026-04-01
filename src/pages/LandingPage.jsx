@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import DRIPPreloader from '../components/DRIP/DRIPPreloader';
+import DRIPPreloader from '../components/drip/DripPreloader';
 import { useSequencePreload } from '../hooks/useSequencePreload';
 
 export default function LandingPage() {

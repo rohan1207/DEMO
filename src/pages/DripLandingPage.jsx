@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import DRIPLandingSequence from '../components/DRIP/DRIPLandingSequence';
+import DRIPLandingSequence from '../components/drip/DripLandingSequence';
 import { useSequencePreload } from '../hooks/useSequencePreload';
 
 export default function DRIPLandingPage() {
