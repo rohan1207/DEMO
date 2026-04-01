@@ -1,6 +1,7 @@
 import React from 'react';
 
 export default function DRIPPreloader({ percent, visible, onVideoEnd }) {
+  const videoHandlers = onVideoEnd ? { onEnded: onVideoEnd } : {};
   return (
     <div
       id="preloader-container"
@@ -18,10 +19,10 @@ export default function DRIPPreloader({ percent, visible, onVideoEnd }) {
               className="w-full h-auto object-contain"
               autoPlay
               muted
-              loop={false}
+              loop
               playsInline
               preload="auto"
-              onEnded={onVideoEnd}
+              {...videoHandlers}
             />
           </div>
         </div>

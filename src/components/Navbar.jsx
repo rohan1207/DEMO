@@ -27,8 +27,8 @@ export default function Navbar({ onCartClick }) {
   }, []);
 
   const navLinks = [
-    { to: '/home',        label: 'Home'    },
-    { to: '/shop',    label: 'Shop'    },
+    { to: '/home', label: 'Home' },
+    { to: '/shop', label: 'Shop' },
     { to: '/contact', label: 'Contact Us' },
     { to: '/about', label: 'About Us' },
   ];
@@ -90,7 +90,6 @@ export default function Navbar({ onCartClick }) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5a7.5 7.5 0 0115 0" />
               </svg>
             </Link>
-            {/* Minimal icons + CTA */}
             <button
               type="button"
               onClick={onCartClick}
@@ -210,7 +209,7 @@ export default function Navbar({ onCartClick }) {
               closeMenu();
             }}
             aria-label="Cart"
-            className="text-black/80 hover:text-black py-3 border-b border-slate-200 transition-colors inline-flex items-center"
+            className="text-black/80 hover:text-black py-3 border-b border-slate-200 transition-colors inline-flex items-center text-left w-full"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-6 w-6" aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h2l2.4 10.2a2 2 0 001.95 1.54h8.9a2 2 0 001.95-1.54L22 7H7.2" />

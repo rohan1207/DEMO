@@ -12,8 +12,14 @@ const MOBILE_END_FRAME = 830;
 const desktopLoadCount = Math.ceil(DESKTOP_TOTAL_FRAMES / FRAME_STEP);
 const MOBILE_TOTAL_FRAMES = Math.ceil((MOBILE_END_FRAME - MOBILE_START_FRAME + 1) / FRAME_STEP);
 
-const ENTRY_READY_PERCENT = 12;
-const ENTRY_MAX_WAIT_MS = 2500;
+/** Must match DripLandingSequence: wide vs narrow uses different asset folders (same 1081px breakpoint). */
+const SEQUENCE_MOBILE_BREAKPOINT_PX = 1081;
+
+// Landing splash: progress bar hits 100% when this fraction of frames are loaded; redirect then. Rest keep loading during /home scroll.
+const LANDING_PRELOAD_TARGET = 0.5;
+
+// Unlock sequence / allow entry when half the frames are in (or timeout with at least frame 0).
+const ENTRY_MAX_WAIT_MS = 12000;
 
 // Wide screens (>1081px): full sequence from mobile-webp folder (785 frames).
 function framePathDesktop(loadIndex) {
@@ -84,9 +90,13 @@ function notifyManager(manager) {
   manager.subscribers.forEach((cb) => cb(snapshot));
 }
 
+function entryReadyThreshold(total) {
+  return Math.max(1, Math.ceil(total * LANDING_PRELOAD_TARGET));
+}
+
 function ensureEntryReady(manager, startedAt) {
   if (manager.entryReady) return;
-  const threshold = Math.max(1, Math.floor(manager.total * (ENTRY_READY_PERCENT / 100)));
+  const threshold = entryReadyThreshold(manager.total);
   const hasFirstFrame = Boolean(manager.frames?.[0]);
   const reachedMinFrames = manager.loaded >= threshold && hasFirstFrame;
   const timedOut = Date.now() - startedAt >= ENTRY_MAX_WAIT_MS && hasFirstFrame;
@@ -152,19 +162,25 @@ function startManager(manager) {
 }
 
 /**
- * Progressive preload:
- * - entryReady: enough frames loaded to start quickly (used by splash redirect)
- * - ready: full sequence loaded
+ * Progressive preload (singleton per layout: desktop vs phone — same paths as DripLandingSequence at 1081px).
+ * - entryReady: ≥ LANDING_PRELOAD_TARGET of frames (or timeout with frame 0) so /home scroll can start smoothly
+ * - ready: full sequence loaded (continues in background after landing redirect)
+ *
+ * @param {function(number): void} [onProgress] — 0–100; if options.landingProgress, 100% = LANDING_PRELOAD_TARGET of frames loaded
  */
-export function useSequencePreload(onProgress) {
+export function useSequencePreload(onProgress, options = {}) {
+  const landingProgress = options.landingProgress === true;
+
   const getInitialSnapshot = () => {
-    const isMobile = typeof window !== 'undefined' ? window.innerWidth <= 1081 : false;
+    const isMobile =
+      typeof window !== 'undefined' ? window.innerWidth <= SEQUENCE_MOBILE_BREAKPOINT_PX : false;
     return toSnapshot(isMobile ? preloadManagers.mobile : preloadManagers.desktop);
   };
   const [snapshot, setSnapshot] = useState(getInitialSnapshot);
 
   useEffect(() => {
-    const isMobile = typeof window !== 'undefined' ? window.innerWidth <= 1081 : false;
+    const isMobile =
+      typeof window !== 'undefined' ? window.innerWidth <= SEQUENCE_MOBILE_BREAKPOINT_PX : false;
     const manager = isMobile ? preloadManagers.mobile : preloadManagers.desktop;
     startManager(manager);
     const unsubscribe = subscribeManager(manager, setSnapshot);
@@ -172,12 +188,18 @@ export function useSequencePreload(onProgress) {
   }, []);
 
   const report = useCallback(() => {
-    const percent =
-      snapshot.total > 0
-        ? Math.min(100, Math.floor((100 * snapshot.loaded) / snapshot.total))
-        : 100;
-    onProgress?.(percent);
-  }, [onProgress, snapshot.loaded, snapshot.total]);
+    if (!onProgress) return;
+    if (snapshot.total > 0) {
+      if (landingProgress) {
+        const denom = entryReadyThreshold(snapshot.total);
+        onProgress(Math.min(100, Math.floor((100 * snapshot.loaded) / denom)));
+      } else {
+        onProgress(Math.min(100, Math.floor((100 * snapshot.loaded) / snapshot.total)));
+      }
+    } else {
+      onProgress(100);
+    }
+  }, [onProgress, landingProgress, snapshot.loaded, snapshot.total]);
 
   useEffect(() => {
     report();
@@ -188,6 +210,8 @@ export function useSequencePreload(onProgress) {
     ready: snapshot.ready,
     entryReady: snapshot.entryReady,
     error: snapshot.error,
+    loaded: snapshot.loaded,
+    total: snapshot.total,
   };
 }
 
@@ -197,4 +221,6 @@ export {
   framePathMobile,
   MOBILE_TOTAL_FRAMES,
   MOBILE_SEQUENCE_SCROLL_VH,
+  LANDING_PRELOAD_TARGET,
+  SEQUENCE_MOBILE_BREAKPOINT_PX,
 };

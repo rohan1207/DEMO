@@ -17,7 +17,7 @@ import ProductDetailPage from './pages/ProductDetailPage';
 import ShopPage from './pages/ShopPage';
 import TermsPage from './pages/TermsPage';
 import WishlistPage from './pages/WishlistPage';
-import './styles/drip.css';
+import './styles/DRIP.css';
 
 function AppShell() {
   const [cartOpen, setCartOpen] = useState(false);

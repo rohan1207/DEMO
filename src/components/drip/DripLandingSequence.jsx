@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { MOBILE_SEQUENCE_SCROLL_VH } from '../../hooks/useSequencePreload';
+import { MOBILE_SEQUENCE_SCROLL_VH, SEQUENCE_MOBILE_BREAKPOINT_PX } from '../../hooks/useSequencePreload';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -37,7 +37,7 @@ export default function DRIPLandingSequence({ frames, sequenceReady }) {
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
-    const mobile = window.innerWidth <= 1081;
+    const mobile = window.innerWidth <= SEQUENCE_MOBILE_BREAKPOINT_PX;
     const width = mobile ? 1080 : 1920;
     const height = mobile ? 1920 : 1080;
     canvas.width = width;
