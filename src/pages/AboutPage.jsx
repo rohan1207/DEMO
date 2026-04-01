@@ -192,78 +192,78 @@ const AboutUs = () => {
     },
   ];
 
-  // Testimonials data
+  // Testimonials — T-REX product reviews, India-based customers
   const testimonials = [
     {
       id: 1,
-      name: "Rohan Mehta",
-      role: "Verified purchase",
-      time: "2 weeks ago",
+      name: "Priya Nambiar",
+      role: "Verified purchase · Bengaluru",
+      time: "4 days ago",
       review:
-        "The finish feels genuinely premium—matte, even, and the lid action is tight without being fiddly. Ice still there at the end of a long workday. This is the tumbler I reach for every morning.",
+        "Using the 1L tumbler on Namma Metro commute and office desk. Ice stays till evening even when the cab is hot—lid doesn’t leak in my bag. Sage green looks subtle, not flashy. Worth it.",
       rating: 5,
     },
     {
       id: 2,
-      name: "Sarah Lin",
-      role: "Verified purchase",
-      time: "a week ago",
+      name: "Arjun Khanna",
+      role: "Verified purchase · Gurugram",
+      time: "1 week ago",
       review:
-        "Finally a bottle that looks as good on a desk as it does in the car. Fits my cup holder perfectly, zero leaks so far, and the pastel green reads subtle and high-end—not loud.",
+        "Ordered for WFH + gym runs. Fits car cup holder, doesn’t sweat on my laptop table. Flip lid is easy one-handed between meetings. Build feels solid, not flimsy like cheaper steel bottles.",
       rating: 5,
     },
     {
       id: 3,
-      name: "James Okafor",
-      role: "Verified purchase",
+      name: "Meera Deshpande",
+      role: "Verified purchase · Pune",
       time: "2 weeks ago",
       review:
-        "Insulation is the real deal. Hot stays hot, cold stays cold, and the mouthfeel of the rim is comfortable for all-day sipping. Build quality matches the price—you can tell it was engineered, not decorated.",
+        "Carry chai in the morning—still warm when I open after stand-up. Evening I switch to cold water. No weird smell after washing. Handle is comfortable for long drives.",
       rating: 5,
     },
     {
       id: 4,
-      name: "Ananya Krishnan",
-      role: "Verified purchase",
-      time: "2 weeks ago",
+      name: "Rahul Saxena",
+      role: "Verified purchase · Delhi NCR",
+      time: "3 days ago",
       review:
-        "I rotate between the gym and client meetings—T-REX is the one product that doesn’t look out of place in either setting. Clean lines, solid weight, no gimmicks. Exactly what I wanted from a premium carry.",
+        "Dropped it once on marble flooring—small scratch only, no dent. Rubber base is quiet on glass table. Blush pink one for my wife; she likes the colour and weight. Delivery was quick.",
       rating: 5,
     },
     {
       id: 5,
-      name: "Marcus Bell",
-      role: "Verified purchase",
-      time: "a week ago",
+      name: "Kavita Iyer",
+      role: "Verified purchase · Chennai",
+      time: "2 weeks ago",
       review:
-        "Dropped it once on tile—no dents, no drama. The exterior still looks new. If you care about durability and a quiet, confident design language, this brand gets it.",
-      rating: 5,
+        "Humid weather here—earlier bottles used to sweat in my tote. This one stays dry outside. Straw option is handy for AC cab rides. Only wish I’d bought the sage one too for the office.",
+      rating: 4,
     },
     {
       id: 6,
-      name: "Elena Varga",
-      role: "Verified purchase",
-      time: "2 weeks ago",
+      name: "Imran Sheikh",
+      role: "Verified purchase · Hyderabad",
+      time: "5 days ago",
       review:
-        "The lid seals with a satisfying click and doesn’t collect grime in awkward corners—small detail, huge difference for daily use. T-REX feels like something I’ll keep for years, not replace in six months.",
+        "Using daily for office + badminton. 1 litre is enough between refills. Lid clicks shut properly—no spills in backpack. Looks good in client meetings also, not like a cheap plastic bottle.",
       rating: 5,
     },
     {
       id: 7,
-      name: "Vikram Shah",
-      role: "Verified purchase",
-      time: "2 weeks ago",
+      name: "Sneha Patil",
+      role: "Verified purchase · Mumbai",
+      time: "1 week ago",
       review:
-        "I’ve tried a few ‘premium’ tumblers; T-REX is the first where the branding feels earned. Minimal, precise, and the product actually performs when you’re commuting, hiking, or stuck in back-to-back calls.",
+        "Local train + local delivery stress—box came intact. Tumbler feels premium in hand, stainless doesn’t feel thin. Mom asked where I bought it; told her T-REX online. Happy with the purchase.",
       rating: 5,
     },
     {
       id: 8,
-      name: "Chloe Park",
-      role: "Verified purchase",
+      name: "Aditya Ghosh",
+      role: "Verified purchase · Kolkata",
       time: "2 weeks ago",
       review:
-        "Love the understated color and the way it sits in hand—balanced, not bulky. Condensation is minimal and it never sweats through my bag. This is everyday carry done right.",
+        "Winter mornings I need hot water till late shift—this actually keeps temperature. Green colour is understated. Colleague saw it and asked for the link. Good Indian brand, no need to import.",
       rating: 5,
     },
   ];

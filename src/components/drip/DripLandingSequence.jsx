@@ -16,6 +16,14 @@ const MOBILE_SCROLL_TOTAL = MOBILE_SEQUENCE_SCROLL_VH;
 const lastMobileSectionVh = (2 * MOBILE_SCROLL_TOTAL) / NUM_SECTIONS;
 const firstTenMobileSectionVh = (MOBILE_SCROLL_TOTAL - lastMobileSectionVh) / 10;
 
+/** Scroll progress where the final “Ready to experience” section starts (pin can extend through progress 1 = last frame). */
+function getReadySectionHoldProgress() {
+  if (typeof window === 'undefined') return 0.82;
+  return window.innerWidth <= SEQUENCE_MOBILE_BREAKPOINT_PX
+    ? 9 / 11
+    : 1000 / 1200;
+}
+
 /**
  * SCROLL MODEL: Canvas is fixed while scrolling through the sequence. When the end of the
  * animation (last frame) is reached, the canvas is "unsticky" (hidden) so content below
@@ -24,12 +32,13 @@ const firstTenMobileSectionVh = (MOBILE_SCROLL_TOTAL - lastMobileSectionVh) / 10
 export default function DRIPLandingSequence({ frames, sequenceReady }) {
   const sequenceBlockRef = useRef(null);
   const canvasRef = useRef(null);
-  const ctaRef = useRef(null);
   const mobileFinalReadyRef = useRef(null);
-  const [mobileReadyPinned, setMobileReadyPinned] = useState(false);
+  const desktopFinalReadyRef = useRef(null);
+  const [readyExperiencePinned, setReadyExperiencePinned] = useState(false);
   // Lerp state — target is set by ScrollTrigger, current is advanced each rAF tick
   const targetFrameRef = useRef(0);
   const currentFrameRef = useRef(0);
+  const sequenceProgressRef = useRef(0);
   const rafIdRef = useRef(null);
 
   // Reload / client navigations: start at top so scroll-driven frame index matches the hero (frame 0).
@@ -43,6 +52,7 @@ export default function DRIPLandingSequence({ frames, sequenceReady }) {
     window.scrollTo(0, 0);
     targetFrameRef.current = 0;
     currentFrameRef.current = 0;
+    sequenceProgressRef.current = 0;
     requestAnimationFrame(() => {
       ScrollTrigger.refresh();
     });
@@ -61,17 +71,27 @@ export default function DRIPLandingSequence({ frames, sequenceReady }) {
     canvas.height = height;
 
     const maxFrame = frames.length - 1;
-    // Last ~30 frames: show product CTAs (desktop CTA overlay; range scales with sequence length)
-    const CTA_FRAME_COUNT = 30;
-    const ctaFrameStart = Math.max(0, maxFrame - CTA_FRAME_COUNT + 1);
 
-    function drawFrame(index) {
-      const i = Math.max(0, Math.min(index, maxFrame));
-      const img = frames[i];
-      if (!img || !ctx) return;
+    /** If target frame not loaded yet (slow network), show nearest loaded frame so scroll never “dies” mid-sequence. */
+    function resolveLoadedImage(requestedIndex) {
+      const r = Math.max(0, Math.min(Math.round(requestedIndex), maxFrame));
+      if (frames[r]) return frames[r];
+      for (let j = r - 1; j >= 0; j -= 1) {
+        if (frames[j]) return frames[j];
+      }
+      for (let j = r + 1; j <= maxFrame; j += 1) {
+        if (frames[j]) return frames[j];
+      }
+      return null;
+    }
+
+    function drawFrame(requestedIndex) {
+      const img = resolveLoadedImage(requestedIndex);
+      if (!ctx) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+      if (!img) return;
 
       if (mobile) {
         // Phone: contain (never crop) — full frame visible, anchored to bottom of canvas buffer.
@@ -100,8 +120,8 @@ export default function DRIPLandingSequence({ frames, sequenceReady }) {
     const scroller = document.querySelector('.main-content') || window;
 
     // rAF render loop — lerps currentFrame toward targetFrame each paint tick.
-    // This decouples scroll events from canvas drawing and gives silky smooth motion.
-    const LERP = 0.18; // 0–1: higher = snappier, lower = more lag
+    // Phone: slightly higher lerp so frames keep up with faster scrub mapping.
+    const LERP = mobile ? 0.24 : 0.18;
     let lastDrawn = -1;
 
     function renderLoop() {
@@ -117,15 +137,6 @@ export default function DRIPLandingSequence({ frames, sequenceReady }) {
       if (displayFrame !== lastDrawn) {
         drawFrame(displayFrame);
         lastDrawn = displayFrame;
-
-        // CTA visibility — direct DOM, zero React lag
-        if (ctaRef.current) {
-          const inRange = displayFrame >= ctaFrameStart && displayFrame <= maxFrame;
-          ctaRef.current.style.transition = inRange
-            ? 'opacity 0.5s cubic-bezier(0.4,0,0.2,1)'
-            : 'none';
-          ctaRef.current.style.opacity = inRange ? '1' : '0';
-        }
       }
 
       rafIdRef.current = requestAnimationFrame(renderLoop);
@@ -141,11 +152,14 @@ export default function DRIPLandingSequence({ frames, sequenceReady }) {
       end: 'bottom top',
       scrub: true,
       onUpdate: (self) => {
-        targetFrameRef.current = Math.round(self.progress * maxFrame);
+        const p = self.progress;
+        sequenceProgressRef.current = p;
+        targetFrameRef.current = Math.round(p * maxFrame);
       },
     });
     targetFrameRef.current = 0;
     currentFrameRef.current = 0;
+    sequenceProgressRef.current = 0;
     ScrollTrigger.refresh();
 
     // Premium horizontal parallax reveal for text blocks
@@ -225,34 +239,41 @@ export default function DRIPLandingSequence({ frames, sequenceReady }) {
     };
   }, [frames]);
 
+  // Phone + desktop: fixed “Ready to experience” while final section is in the pin band, and keep it through scroll progress 1 (last frame) until user scrolls back.
   useEffect(() => {
-    if (mobileReadyPinned) return;
-    const isPhone = window.innerWidth <= 768;
-    if (!isPhone) return;
+    if (!sequenceReady) return;
 
-    const scroller = document.querySelector('.main-content');
-    const target = mobileFinalReadyRef.current;
-    if (!target) return;
+    const scroller = document.querySelector('.main-content') || window;
 
-    const checkAndPin = () => {
-      const rect = target.getBoundingClientRect();
-      // 60% from bottom == 40% from top viewport
-      const pinThresholdFromTop = window.innerHeight * 0.4;
-      if (rect.top <= pinThresholdFromTop) {
-        setMobileReadyPinned(true);
-      }
+    const checkPinZone = () => {
+      const isMobileLayout = window.innerWidth <= SEQUENCE_MOBILE_BREAKPOINT_PX;
+      const target = isMobileLayout ? mobileFinalReadyRef.current : desktopFinalReadyRef.current;
+      const progress = sequenceProgressRef.current;
+      const holdFrom = getReadySectionHoldProgress();
+
+      const pinByRect = (() => {
+        if (!target) return false;
+        const rect = target.getBoundingClientRect();
+        const pinThresholdFromTop = window.innerHeight * 0.4;
+        const sectionStillVisibleBelowTop = rect.bottom > 0;
+        const inUpperBand = rect.top <= pinThresholdFromTop;
+        return sectionStillVisibleBelowTop && inUpperBand;
+      })();
+
+      const pinThroughLastFrames = progress >= holdFrom - 1e-6 && progress <= 1 + 1e-6;
+
+      setReadyExperiencePinned(pinByRect || pinThroughLastFrames);
     };
 
-    checkAndPin();
-    const el = scroller || window;
-    el.addEventListener('scroll', checkAndPin, { passive: true });
-    window.addEventListener('resize', checkAndPin);
+    checkPinZone();
+    scroller.addEventListener('scroll', checkPinZone, { passive: true });
+    window.addEventListener('resize', checkPinZone);
 
     return () => {
-      el.removeEventListener('scroll', checkAndPin);
-      window.removeEventListener('resize', checkAndPin);
+      scroller.removeEventListener('scroll', checkPinZone);
+      window.removeEventListener('resize', checkPinZone);
     };
-  }, [mobileReadyPinned]);
+  }, [sequenceReady]);
 
   const scrollToBottom = () => {
     const main = document.querySelector('.main-content');
@@ -454,25 +475,33 @@ export default function DRIPLandingSequence({ frames, sequenceReady }) {
             </div>
           </section>
 
-          {/* Section 10 + CTA — tall section + sticky copy so “Ready to experience” stays visible (no parallax fade-out) */}
-          <section className="min-h-[200vh] w-full flex items-start justify-center px-6 pt-[12vh] lg:px-24 lg:pt-[14vh]">
-            <div className="DRIP-sticky-ready sticky top-[min(20vh,9rem)] z-10 mx-auto w-full max-w-md space-y-9 text-center">
-              <h2 className="text-5xl md:text-6xl lg:text-[3.4rem] font-semibold tracking-tight text-gray-900 leading-tight">
-                Ready to<br />experience it?
-              </h2>
-              <Link
-                to="/shop"
-                className="inline-flex items-center gap-3 rounded-full bg-[#7FAF73] px-8 py-3 text-sm md:text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-white hover:bg-[#719D66] transition-colors"
-              >
-                Buy now
-              </Link>
-            </div>
+          {/* Section 10 — tall runway; sticky in-flow copy until pin hands off to fixed centered overlay (same behavior as phone) */}
+          <section
+            ref={desktopFinalReadyRef}
+            className="min-h-[200vh] w-full flex items-start justify-center px-6 pt-[12vh] lg:px-24 lg:pt-[14vh]"
+          >
+            {!readyExperiencePinned && (
+              <div className="DRIP-sticky-ready sticky top-[min(20vh,9rem)] z-10 mx-auto w-full max-w-md space-y-9 text-center">
+                <h2 className="text-5xl md:text-6xl lg:text-[3.4rem] font-semibold tracking-tight text-gray-900 leading-tight">
+                  Ready to<br />experience it?
+                </h2>
+                <Link
+                  to="/shop"
+                  className="inline-flex items-center gap-3 rounded-full bg-[#7FAF73] px-8 py-3 text-sm md:text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-white hover:bg-[#719D66] transition-colors"
+                >
+                  Buy now
+                </Link>
+              </div>
+            )}
           </section>
         </div>
 
         {/* Phone (≤1081px): same story beats as desktop, center-aligned, above the canvas; scroll height matches frame mapping */}
         <div className="min-[1082px]:hidden relative z-20">
-          <section className="DRIP-mobile-section flex w-full items-center justify-center px-5" style={{ minHeight: `${firstTenMobileSectionVh}vh` }}>
+          <section
+            className="DRIP-mobile-section flex w-full items-start justify-center px-5 pt-[calc(72px+env(safe-area-inset-top,0px))]"
+            style={{ minHeight: `${firstTenMobileSectionVh}vh` }}
+          >
             <div className="DRIP-mobile-section-inner mx-auto max-w-md space-y-4 text-center">
               <h1 className="text-4xl font-semibold tracking-tight text-gray-900 leading-tight">A better</h1>
               <h2 className="text-3xl font-semibold tracking-tight text-[#7FAF73] leading-tight">everyday tumbler</h2>
@@ -541,7 +570,7 @@ export default function DRIPLandingSequence({ frames, sequenceReady }) {
             className="DRIP-mobile-section DRIP-mobile-section--final flex w-full items-start justify-center px-5"
             style={{ minHeight: `${lastMobileSectionVh}vh` }}
           >
-            {!mobileReadyPinned && (
+            {!readyExperiencePinned && (
               <div className="sticky top-[72px] z-20 mx-auto w-full max-w-md space-y-6 px-2 py-2 text-center">
               <h2 className="text-3xl font-semibold tracking-tight text-gray-900 leading-tight">Ready to experience it?</h2>
               <Link
@@ -561,103 +590,25 @@ export default function DRIPLandingSequence({ frames, sequenceReady }) {
       <div className="h-screen w-full bg-transparent" aria-hidden="true" />
       </div>
 
-      {mobileReadyPinned && (
-        <div className="fixed left-1/2 top-[40vh] z-[70] w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 px-2 text-center min-[769px]:hidden">
-          <div className="space-y-4 rounded-2xl bg-white/70 p-3 backdrop-blur-[1px]">
-            <h2 className="text-3xl font-semibold tracking-tight text-gray-900 leading-tight">Ready to experience it?</h2>
-            <Link
-              to="/shop"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-[#7FAF73] px-8 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-white"
-            >
-              Buy now
-            </Link>
-          </div>
+      {readyExperiencePinned && (
+        <div className="fixed left-1/2 top-1/2 z-[70] flex w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-4 px-2 text-center min-[1082px]:max-w-md min-[1082px]:gap-6">
+          <h2 className="text-3xl font-semibold leading-tight tracking-tight text-gray-900 min-[1082px]:text-5xl min-[1082px]:leading-tight">
+            Ready to
+            <br />
+            experience it?
+          </h2>
+          <Link
+            to="/shop"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-[#7FAF73] px-8 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-white min-[1082px]:px-10 min-[1082px]:py-3.5 min-[1082px]:text-sm"
+          >
+            Buy now
+          </Link>
         </div>
       )}
 
       {/* Fixed canvas — always visible, stays on last frame once animation completes */}
       <div className="DRIP-canvas-container">
         <canvas ref={canvasRef} className="w-full h-full" />
-      </div>
-
-      {/* Product CTAs — z above canvas + scroll copy; on phone sits lower and can overlap tumblers */}
-      <div
-        ref={ctaRef}
-        className="fixed left-0 z-[60] w-screen pointer-events-none max-[1081px]:bottom-[26%] max-[1081px]:top-auto max-[1081px]:h-auto max-[768px]:bottom-[28%] min-[1082px]:top-[100px] min-[1082px]:h-[calc(100vh-100px)]"
-        style={{
-          opacity: 0,
-          transition: 'none',
-        }}
-      >
-        {/* Desktop: absolute positions over sequence */}
-        <div className="relative hidden h-full min-[1082px]:block">
-          <Link
-            to="/product/sage-green"
-            className="absolute pointer-events-auto flex flex-col items-center gap-1.5"
-            style={{ left: '30%', top: '14%', transform: 'translateX(-50%)' }}
-          >
-            <div className="flex items-baseline gap-2 mb-1">
-              <span className="text-sm font-semibold text-gray-900">₹2,499</span>
-              <span className="text-xs font-medium text-gray-400 line-through">₹3,000</span>
-            </div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-[#7FAF73] px-7 py-2.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-white shadow-[0_4px_20px_rgba(127,175,115,0.35)] hover:bg-[#6a9e63] transition-all duration-300">
-              Shop Now
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3 shrink-0">
-                <path fillRule="evenodd" d="M2 8a.75.75 0 01.75-.75h8.69L9.22 5.03a.75.75 0 011.06-1.06l3.5 3.5a.75.75 0 010 1.06l-3.5 3.5a.75.75 0 11-1.06-1.06l2.22-2.22H2.75A.75.75 0 012 8z" clipRule="evenodd" />
-              </svg>
-            </span>
-            <span className="text-[12px] font-semibold tracking-[0.18em] uppercase text-gray-900 mt-0.5">Sage Green</span>
-          </Link>
-          <Link
-            to="/product/blush-pink"
-            className="absolute pointer-events-auto flex flex-col items-center gap-1.5"
-            style={{ left: '69%', top: '14%', transform: 'translateX(-50%)' }}
-          >
-            <div className="flex items-baseline gap-2 mb-1">
-              <span className="text-sm font-semibold text-gray-900">₹2,499</span>
-              <span className="text-xs font-medium text-gray-400 line-through">₹3,000</span>
-            </div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-[#7FAF73] px-7 py-2.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-white shadow-[0_4px_20px_rgba(127,175,115,0.35)] hover:bg-[#6a9e63] transition-all duration-300">
-              Shop Now
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3 shrink-0">
-                <path fillRule="evenodd" d="M2 8a.75.75 0 01.75-.75h8.69L9.22 5.03a.75.75 0 011.06-1.06l3.5 3.5a.75.75 0 010 1.06l-3.5 3.5a.75.75 0 11-1.06-1.06l2.22-2.22H2.75A.75.75 0 012 8z" clipRule="evenodd" />
-              </svg>
-            </span>
-            <span className="text-[12px] font-semibold tracking-[0.18em] uppercase text-gray-900 mt-0.5">Blush Pink</span>
-          </Link>
-        </div>
-
-        {/* Phone: two columns, centered, nowrap buttons, sits above frames */}
-        <div className="flex min-[1082px]:hidden w-full justify-center px-2">
-          <div className="flex w-full max-w-lg items-start justify-between gap-[6.5rem] sm:gap-[7.5rem] pointer-events-auto">
-            <Link to="/product/sage-green" className="flex min-w-0 flex-1 flex-col items-center gap-1.5 text-center">
-              <div className="flex flex-wrap items-baseline justify-center gap-x-1.5 gap-y-0">
-                <span className="text-xs font-semibold text-gray-900 sm:text-sm">₹2,499</span>
-                <span className="text-[10px] font-medium text-gray-400 line-through sm:text-xs">₹3,000</span>
-              </div>
-              <span className="inline-flex w-fit max-w-full items-center justify-center gap-1 rounded-full bg-[#7FAF73] px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-white shadow-[0_4px_16px_rgba(127,175,115,0.4)] whitespace-nowrap">
-                Shop Now
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-2.5 w-2.5 shrink-0">
-                  <path fillRule="evenodd" d="M2 8a.75.75 0 01.75-.75h8.69L9.22 5.03a.75.75 0 011.06-1.06l3.5 3.5a.75.75 0 010 1.06l-3.5 3.5a.75.75 0 11-1.06-1.06l2.22-2.22H2.75A.75.75 0 012 8z" clipRule="evenodd" />
-                </svg>
-              </span>
-              <span className="text-[10px] font-semibold tracking-[0.14em] uppercase text-gray-900 sm:text-[11px] sm:tracking-[0.16em]">Sage Green</span>
-            </Link>
-            <Link to="/product/blush-pink" className="flex min-w-0 flex-1 flex-col items-center gap-1.5 text-center">
-              <div className="flex flex-wrap items-baseline justify-center gap-x-1.5 gap-y-0">
-                <span className="text-xs font-semibold text-gray-900 sm:text-sm">₹2,499</span>
-                <span className="text-[10px] font-medium text-gray-400 line-through sm:text-xs">₹3,000</span>
-              </div>
-              <span className="inline-flex w-fit max-w-full items-center justify-center gap-1 rounded-full bg-[#7FAF73] px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-white shadow-[0_4px_16px_rgba(127,175,115,0.4)] whitespace-nowrap">
-                Shop Now
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-2.5 w-2.5 shrink-0">
-                  <path fillRule="evenodd" d="M2 8a.75.75 0 01.75-.75h8.69L9.22 5.03a.75.75 0 011.06-1.06l3.5 3.5a.75.75 0 010 1.06l-3.5 3.5a.75.75 0 11-1.06-1.06l2.22-2.22H2.75A.75.75 0 012 8z" clipRule="evenodd" />
-                </svg>
-              </span>
-              <span className="text-[10px] font-semibold tracking-[0.14em] uppercase text-gray-900 sm:text-[11px] sm:tracking-[0.16em]">Blush Pink</span>
-            </Link>
-          </div>
-        </div>
       </div>
 
       <button type="button" className="DRIP-scroll-to-bottom" onClick={scrollToBottom} aria-label="Scroll to bottom">

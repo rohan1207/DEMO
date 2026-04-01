@@ -18,6 +18,15 @@ const SEQUENCE_MOBILE_BREAKPOINT_PX = 1081;
 // Landing splash: 100% means all frames for the current screen size are loaded.
 const LANDING_PRELOAD_TARGET = 1;
 
+/** Min frames before leaving splash — balances wait time vs scroll safety on slow networks. */
+const LANDING_BUFFER_MIN = 56;
+const LANDING_BUFFER_FRACTION = 0.07;
+
+export function getLandingBufferRequired(total) {
+  if (!total || total <= 0) return LANDING_BUFFER_MIN;
+  return Math.min(total, Math.max(LANDING_BUFFER_MIN, Math.ceil(total * LANDING_BUFFER_FRACTION)));
+}
+
 // Wide screens (>1081px): mobile-webp/ — 785 frames (ezgif-frame-001 … 785).
 function framePathDesktop(loadIndex) {
   const num = loadIndex * FRAME_STEP + 1;
@@ -32,7 +41,11 @@ function framePathMobile(loadIndex) {
 
 // Legacy baseline scroll height — scales phone scroll distance with frame count
 const LEGACY_MOBILE_FRAME_COUNT = 564;
-const MOBILE_SEQUENCE_SCROLL_VH = Math.round((2000 * MOBILE_TOTAL_FRAMES) / LEGACY_MOBILE_FRAME_COUNT);
+/** Values below 1 shorten total mobile scroll (more frames per px). Desktop layout is unchanged. */
+const MOBILE_SCROLL_DISTANCE_SCALE = 0.55;
+const MOBILE_SEQUENCE_SCROLL_VH = Math.round(
+  ((2000 * MOBILE_TOTAL_FRAMES) / LEGACY_MOBILE_FRAME_COUNT) * MOBILE_SCROLL_DISTANCE_SCALE,
+);
 
 function loadImage(src) {
   return new Promise((resolve) => {
@@ -107,7 +120,7 @@ function startManager(manager) {
   manager.started = true;
 
   (async () => {
-    const BATCH = 20;
+    const BATCH = 32;
     const results = new Array(manager.total).fill(null);
     manager.frames = results;
     notifyManager(manager);
@@ -160,9 +173,9 @@ function startManager(manager) {
 /**
  * Progressive preload (singleton per layout: desktop vs phone — same paths as DripLandingSequence at 1081px).
  * - entryReady: first frame is drawable (show Home canvas + hero without waiting for the full sequence)
- * - ready: full sequence loaded (LandingPage uses this before navigating to /home)
+ * - ready: full sequence loaded (background)
  *
- * @param {function(number): void} [onProgress] — 0–100; if options.landingProgress, denom = full frame count
+ * @param {function(number): void} [onProgress] — 0–100; if options.landingProgress, denom = getLandingBufferRequired(total) (not full sequence)
  */
 export function useSequencePreload(onProgress, options = {}) {
   const landingProgress = options.landingProgress === true;
@@ -187,7 +200,7 @@ export function useSequencePreload(onProgress, options = {}) {
     if (!onProgress) return;
     if (snapshot.total > 0) {
       if (landingProgress) {
-        const denom = entryReadyThreshold(snapshot.total);
+        const denom = getLandingBufferRequired(snapshot.total);
         onProgress(Math.min(100, Math.floor((100 * snapshot.loaded) / denom)));
       } else {
         onProgress(Math.min(100, Math.floor((100 * snapshot.loaded) / snapshot.total)));
