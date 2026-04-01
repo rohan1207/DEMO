@@ -1,6 +1,6 @@
 import React from 'react';
-import DRIPLandingPage from './DRIPLandingPage';
-import DummySection from '../components/DRIP/DummySection';
+import DRIPLandingPage from './DripLandingPage';
+import DummySection from '../components/drip/DummySection';
 import SecondSection from '../components/SecondSection';
 /**
  * Home page: one long scroll. Order = DRIP landing (animation) → sections below → Footer is in App.
